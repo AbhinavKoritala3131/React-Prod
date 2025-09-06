@@ -1,0 +1,213 @@
+/* src/styles/Dashboard.css */
+
+.header {
+  position: sticky;
+  top: 0;
+  background: #fff;
+  z-index: 1000;
+  padding: 10px 20px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.dashboard-container {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: #f4f6f8;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  position: relative;
+}
+
+.dashboard-header {
+  background-color: #0052cc;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1100;
+}
+
+.company-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.menu-icon {
+  font-size: 1.6rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.profile-icon {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: white;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow: hidden;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  min-width: 160px;
+}
+
+.profile-dropdown button {
+  padding: 12px 16px;
+  border: none;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  width: 100%;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease;
+}
+
+.profile-dropdown button:hover {
+  background-color: #f0f0f0;
+}
+
+.sidebar {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  width: 250px;
+  height: 100%;
+  background: #1e1e2f;
+  padding: 20px 15px;
+  box-sizing: border-box;
+  z-index: 1050;
+
+  /* Animation setup */
+  transform: translateX(-100%);
+  opacity: 0;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  box-shadow: 10px 10px 60px;
+}
+
+.sidebar.open {
+  transform: translateX(0);
+  opacity: 1;
+}
+
+.sidebar button,
+.sidebar a {
+  display: block;
+  margin: 8px 0;
+  padding: 12px 18px;
+  background: #e9f1ff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  font-weight: 600;
+  color: #0052cc;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+
+}
+
+.sidebar button:hover,
+.sidebar a:hover,
+.sidebar a.active {
+  background-color: #c1d4ff;
+}
+
+
+/* Floating welcome card */
+.floating-welcome {
+  background: white;
+  padding: 30px 25px;
+  border-radius: 12px;
+  max-width: 420px;
+  margin: 80px auto;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
+  text-align: center;
+  animation: fadeIn 1s ease-in-out;
+}
+
+.floating-welcome h2 {
+  margin-bottom: 12px;
+  font-weight: 700;
+  font-size: 1.6rem;
+}
+
+.floating-welcome p {
+  font-size: 1.1rem;
+  margin-bottom: 18px;
+  color: #333;
+}
+
+.primary-btn {
+  margin-top: 15px;
+  padding: 12px 26px;
+  background-color: #0052cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.primary-btn:hover {
+  background-color: #003f9e;
+}
+
+/* Fade-in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 200px;
+    padding: 15px 12px;
+  }
+
+  .dashboard-header {
+    padding: 14px 18px;
+  }
+
+  .company-name {
+    font-size: 1.2rem;
+  }
+
+  .primary-btn {
+    font-size: 1rem;
+    padding: 10px 20px;
+  }
+
+  .floating-welcome {
+    margin: 70px 20px;
+    padding: 25px 20px;
+  }
+}

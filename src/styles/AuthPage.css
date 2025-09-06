@@ -1,0 +1,322 @@
+.input-error {
+  border: 2px solid red !important;
+  box-shadow: 0 0 4px red;
+}
+
+.input-error:focus {
+  outline: none;
+  box-shadow: 0 0 6px darkred;
+}
+/* Center everything horizontally and vertically */
+
+.auth-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  background-color: #0d0d0d; /* dark background */
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Container for the form and header */
+.auth-container {
+  background: #1c1f2b;
+  width: 100%;
+  max-width: 520px;
+  padding: 2.5rem 3rem;
+ border-radius: 24px;
+   box-shadow:
+    0 24px 48px rgba(208, 47, 144, 0.7),
+    0 36px 72px rgba(0, 0, 0, 0.5),
+    0 0 70px rgba(0, 123, 255, 0.08),
+    0 0 14px rgba(0, 123, 255, 0.15);
+  color: #4528bb;
+}
+
+/* Header styling */
+.header {
+  text-align: center;
+  margin-bottom: 1rem;
+  position: relative;
+  padding: 0.75rem 1.5rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: #151c5f;
+
+  font-weight: 700;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
+  box-shadow: 0 0 16px rgba(0, 123, 255, 0.4);
+}
+
+.header {
+  background-color: #3041c7 !important;
+  color: white !important;
+}
+
+
+.header::before,
+.header::after {
+  content: '';
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #00c3ff;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.header::before {
+  left: -15px;
+  box-shadow: 0 0 8px #00c3ff;
+}
+
+.header::after {
+  right: -15px;
+  box-shadow: 0 0 8px #00c3ff;
+}
+
+.tagline {
+  text-align: center;
+  font-size: 1rem;
+  color: #7abaff;
+  margin-bottom: 1.2rem;
+}
+
+/* Title */
+.title {
+  text-align: center;
+  font-size: 1.4rem;
+  color: #66b2ff;
+  margin-bottom: 1.5rem;
+}
+
+/* Form card */
+.form-card {
+  background: #1f2430;
+  border-radius: 16px;
+  padding: 1.8rem 2rem;
+  margin-bottom: 2rem;
+  box-shadow: inset 0 0 12px rgba(0, 64, 128, 0.05);
+}
+
+/* Form headings */
+.form-card h2 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  color: #7abaff;
+  font-weight: 700;
+}
+
+/* Inputs */
+input,
+select {
+  width: 100%;
+  padding: 0.6rem;
+  margin-bottom: 1rem;
+  background-color: #2a2f3b;
+  border: 1px solid #3a3f4b;
+  border-radius: 6px;
+  color: #e0e0e0;
+  font-size: 1rem;
+  box-sizing: border-box;
+}
+label {
+  display: block;        /* ensures labels take full width */
+  margin-bottom: 8px;    /* adds space below labels */
+  font-weight: 600;      /* optional, just to keep labels clear */
+  color: #aab8d3;        /* optional, for better contrast */
+}
+
+input, select, textarea {
+  margin-bottom: 16px;   /* space below inputs */
+  padding: 0.6rem;
+  border-radius: 12px;
+  border: 1px solid #3a3f4b;
+  background-color: #2a2f3b;
+  color: #e0e0e0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.4);
+}
+
+.submit-btn {
+  display: inline-block;
+  padding: 0.5rem 2rem;
+  font-size: 1rem;
+  border-radius: 24px;
+  background: linear-gradient(135deg, #007bff, #0056b3);
+  color: white;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  
+  /* Center horizontally */
+  margin-left: 35%; 
+}
+
+/* Hover effect: just darken the background, no glow */
+.submit-btn:hover {
+  background: linear-gradient(135deg, #0056b3, #003d80);
+  box-shadow: none;
+}
+/* Switch link */
+.switch-link {
+  text-align: center;
+  font-size: 0.9rem;
+  color: #7abaff;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #4dabff;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: 0.9rem;
+  padding: 0;
+}
+
+.link-btn:hover {
+  color: #66ccff;
+}
+
+/* Footer */
+.footer {
+  text-align: center;
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 1rem;
+  border-top: 1px solid #2a2a2a;
+  padding-top: 1rem;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  background-color: #0d0d0d;
+  box-sizing: border-box;
+}
+.status-msg {
+  margin-top: 12px;
+  font-weight: 600;
+  font-size: 1rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.status-msg.success {
+  color: #1565c0; /* nice blue */
+  background-color: #e3f2fd;
+  border: 1px solid #90caf9;
+}
+
+.status-msg.error {
+  color: #c62828; /* red */
+  background-color: #ffebee;
+  border: 1px solid #ef9a9a;
+}
+/* Red border for error inputs */
+.error-input {
+  border: 2px solid red !important;
+  box-shadow: 0 0 8px 2px rgba(255, 0, 0, 0.7);
+  outline: none;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Dark red box shadow on auth-container when hovering any invalid input */
+.auth-container.error-shadow:hover {
+  box-shadow: 0 0 15px 5px darkred;
+  transition: box-shadow 0.3s ease;
+}
+
+/* Dark red shadow on hovering invalid inputs */
+.error-input:hover {
+  box-shadow: 0 0 12px 3px darkred !important;
+  cursor: help;
+}
+
+/* Blue tick icon for success */
+.blue-tick {
+  color: blue;
+  font-weight: bold;
+  font-size: 1.5rem;
+  margin-right: 8px;
+}
+
+/* Submit message styles */
+.submit-message {
+  margin-top: 1rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+}
+
+.submit-message.success {
+  color: blue;
+}
+
+.submit-message.error {
+  color: red;
+}
+
+/* Optional: style for input focus */
+input:focus,
+select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 6px #4a90e2;
+  outline: none;
+}
+
+/* Optional styling to keep consistent input size */
+input,
+select {
+  padding: 8px 10px;
+  font-size: 1rem;
+  border: 1.5px solid #ccc;
+  border-radius: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 15px;
+}
+.response-message.success {
+  color: blue;
+}
+
+.response-message.error {
+  color: red;
+}
+
+@keyframes greenShadowPulse {
+  0% {
+    box-shadow: 0 0 10px 2px rgba(0, 255, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 24px 8px rgba(0, 255, 0, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 10px 2px rgba(0, 255, 0, 0.3);
+  }
+}
+.auth-container.success-shadow {
+  animation: greenShadowPulse 1.5s infinite ease-in-out;
+}
+
