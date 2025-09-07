@@ -1,4 +1,6 @@
 import React, { useEffect, useState } from 'react';
+import { TimePicker } from 'rsuite';
+import 'rsuite/dist/rsuite.min.css';
 import 'react-clock/dist/Clock.css';
 import '../styles/Timesheets.css';
 import api from '../api/axios'; 
@@ -108,6 +110,25 @@ const Timesheets = () => {
   return true;
 };
 
+// Convert time "HH:mm AM/PM" string to Date object on 1970-01-01
+const timeStringToDate = (timeStr) => {
+  if (!timeStr) return null;
+  // Parse "08:30 AM" or "14:45"
+  const [time, meridian] = timeStr.split(' ');
+  let [hours, minutes] = time.split(':').map(Number);
+  if (meridian) {
+    if (meridian.toUpperCase() === 'PM' && hours < 12) hours += 12;
+    if (meridian.toUpperCase() === 'AM' && hours === 12) hours = 0;
+  }
+  const d = new Date(1970, 0, 1, hours, minutes, 0);
+  return d;
+};
+
+// Convert Date object to "hh:mm AM/PM" string
+const dateToTimeString = (date) => {
+  if (!date) return '';
+  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+};
 
 
 
@@ -280,7 +301,8 @@ const allWeeksSubmitted = weekOptions.every(week =>
 
       <div className="week-selector">
         <label>Select Week:</label>
-        <select
+        <select  style={{ color: 'black' }}
+
           value={selectedWeek}
           onChange={(e) => setSelectedWeek(e.target.value)}
         >
@@ -317,7 +339,7 @@ const allWeeksSubmitted = weekOptions.every(week =>
   <>
     <div className="project-dropdown">
       <label>Select Project:</label>
-      <select
+      <select style={{ color: 'white' }}
         value={selectedProject}
         onChange={(e) => setSelectedProject(e.target.value)}
       >
@@ -361,35 +383,48 @@ const allWeeksSubmitted = weekOptions.every(week =>
               >
                 <td>{day.label}</td>
                 <td>
-                  <input disabled={isWeekend} 
-                    type="time"
-                    value={entry.start || ''}
-                    onChange={(e) =>
-                      handleManualChange(day.fullDate, 'start', e.target.value)
-                    }
-                  />
-                </td>
+  <TimePicker className="rs-picker-toggle"
+    format="hh:mm a"
+    value={timeStringToDate(entry.start)}
+    onChange={(value) => {
+      if (!value) return;
+      const timeString = dateToTimeString(value);
+      handleManualChange(day.fullDate, 'start', timeString);
+    }}
+    hour12
+    placeholder="Start time"
+    disabled={isWeekend}
+  />
+</td>
+<td>
+  <TimePicker className="rs-picker-toggle"
+    format="hh:mm a"
+    value={timeStringToDate(entry.end)}
+    onChange={(value) => {
+      if (!value) return;
+      const timeString = dateToTimeString(value);
+      handleManualChange(day.fullDate, 'end', timeString);
+    }}
+    hour12
+    placeholder="End time"
+    disabled={isWeekend}
+  />
+</td>
+
                 <td>
-                  <input disabled={isWeekend} 
-                    type="time"
-                    value={entry.end || ''}
-                    onChange={(e) =>
-                      handleManualChange(day.fullDate, 'end', e.target.value)
-                    }
-                  />
-                </td>
-                <td>
-                  {isToday && (
-                    <button disabled={isWeekend}  className={`clock-btn ${!entry.start ? 'clock-in' : !entry.end ? 'clock-out' : 'done'}`}
-                     onClick={() => handleClock(day.fullDate)}>
-                      {!entry.start
-                        ? 'Clock In'
-                        : !entry.end
-                        ? 'Clock Out'
-                        : 'Done'}
-                    </button>
-                  )}
-                </td>
+  {isToday &&  (
+    <button 
+      disabled={isWeekend}
+      className={`clock-btn ${!entry.start ? 'clock-in' : !entry.end ? 'clock-out' : 'done'}`}
+      onClick={() => handleClock(day.fullDate)}
+      title={isWeekend ? "Cannot clockout on weekends" : ""}
+      
+    >
+      {!entry.start ? 'Clock In' : !entry.end ? 'Clock Out' : 'Done'}
+    </button>
+  )}
+</td>
+
                 <td>{entry.total || '0.00'} hrs</td>
               </tr>
             );

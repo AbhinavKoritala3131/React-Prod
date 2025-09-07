@@ -10,6 +10,8 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
 
 
   const navigate = useNavigate(); 
+  
+
 
   // Register form state
   const [formData, setFormData] = useState({
@@ -49,6 +51,8 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     setRegisterResponse(null);
     setSigninResponse(null);
     setSubmitError(null);
+    setRegisterSubmitted(false);  // ✅ Reset
+  setSigninSubmitted(false);   
   };
 
   // Register form handlers
@@ -58,16 +62,18 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     setFormErrors((prev) => ({ ...prev, [name]: null }));
     setRegisterResponse(null);
     setSubmitError(null);
+    setRegisterSubmitted(false); // stops showing error-shadow as user begins to fix errors
+
   };
 
   const validateRegisterForm = () => {
     const errors = {};
 
-    if (!formData.firstName.trim() || formData.firstName.trim().length < 2 || /\d/.test(formData.firstName)) {
-      errors.firstName = 'First name must be at least 2 letters and contain no numbers';
+    if (!formData.firstName.trim() || formData.firstName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.firstName.trim())) {
+      errors.firstName = 'First name must be at least 2 letters and contain only letters';
     }
-    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 || /\d/.test(formData.lastName)) {
-      errors.lastName = 'Last name must be at least 2 letters and contain no numbers';
+    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.firstName.trim())) {
+      errors.lastName = 'Last name must be at least 2 letters and contain only letters';
     }
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
@@ -107,8 +113,9 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
 
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
-      setRegisterSubmitted(true);
+    setRegisterSubmitted(true);
 
+    
 
     if (!validateRegisterForm()) {
       setSubmitError('Please fix the errors to register.');
@@ -204,40 +211,66 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     }
   };
 
-  // Helpers for UI
+  // ======== Helpers for UI ========
+
+  // Add floating red border if error present, also add title for hover tooltip
   const getInputProps = (field) => {
   if (activeForm === 'register') {
     return {
-      className: registerSubmitted && formErrors[field] ? 'input-error' : '',
-      title: formErrors[field] || ''
+      className: formErrors[field] ? 'input-error' : '',
+      title: formErrors[field] || '',
     };
-  } else if (activeForm === 'signup') {
-    return {
-      className: signinSubmitted && signinResponse && !signinResponse.success ? 'input-error' : '',
-      title: signinSubmitted && signinResponse && !signinResponse.success ? signinResponse.message : ''
-    };
-  } else {
-    return {};
   }
+
+  if (activeForm === 'signup' && signinSubmitted) {
+    const isError = field === 'email' && !signinData.email ||
+                    field === 'password' && !signinData.password;
+    return {
+      className: isError ? 'input-error' : '',
+      title: isError ? 'This field is required' : '',
+    };
+  }
+
+  return {};
 };
 
-  const hasRegisterErrors = Object.keys(formErrors).length > 0;
-  const hasSigninError = signinResponse && !signinResponse.success;
 
+  // Add dark red shadow to auth-container if any error on register form or signin error
+const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 0;
+   const hasSigninError = signinResponse && !signinResponse.success;
+
+  
   return (
     <div className="auth-page">
+       <header className="auth-header"> VECTROLLA   
+    <p className="tagline">From clock-in to Project win !</p>
+    <h1 className="title">Welcome to User Portal</h1>
+  </header>
+  <div className="main-content">
+  <div className="left-side">
+   
+  <h1>From clock-in to project win!</h1>
+  <p>Manage your projects and time effortlessly with our user portal.</p>
+  <ul>
+    <li>Track your tasks</li>
+    <li>Collaborate seamlessly</li>
+    <li>Boost your productivity</li>
+  </ul>
+</div>
+       
       <div
-        className={`auth-container ${
-          (registerSubmitted && hasRegisterErrors || hasSigninError)
-            ? 'error-shadow'
-            : (signinResponse?.success || registerResponse?.success)
-            ? 'success-shadow'
-            : ''
-        }`}
-      >
-        <div className="header">My Enterprise</div>
-        <p className="tagline">User Portal</p>
-        <h1 className="title">Welcome to User Portal</h1>
+  className={`auth-container ${
+    (hasRegisterErrors || hasSigninError)
+      ? 'error-shadow'
+      : (signinResponse?.success || registerResponse?.success)
+      ? 'success-shadow'
+      : ''
+  }`}
+>
+
+       
+        {/* <p className="tagline">From clock-in to Project win !</p>
+        <h1 className="title">Welcome to User Portal</h1> */}
 
         {activeForm === 'signup' && (
           <div id="signup-form" className="form-card">
@@ -248,6 +281,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 id="signin-email"
                 type="email"
                 name="email"
+                placeholder='youremail@gmail.com'
                 value={signinData.email}
                 onChange={handleSigninChange}
                 required
@@ -259,6 +293,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 id="signin-password"
                 type="password"
                 name="password"
+                placeholder='********'
                 value={signinData.password}
                 onChange={handleSigninChange}
                 required
@@ -315,6 +350,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 id="register-firstName"
                 type="text"
                 name="firstName"
+                placeholder='e.g. Noah'
                 pattern="^[A-Za-z\s]+$"
                 value={formData.firstName}
                 onChange={handleChange}
@@ -326,6 +362,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 id="register-lastName"
                 type="text"
                 name="lastName"
+                placeholder=' e.g. Dawson'
                 pattern="^[A-Za-z\s]+$"
                 value={formData.lastName}
                 onChange={handleChange}
@@ -337,6 +374,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 id="register-email"
                 type="email"
                 name="email"
+                placeholder='e.g. Noah.dawson@yahoo.com'
                 value={formData.email}
                 onChange={handleChange}
                 {...getInputProps('email')}
@@ -347,6 +385,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 id="register-password"
                 type="password"
                 name="password"
+                placeholder='********'
                 value={formData.password}
                 onChange={handleChange}
                 {...getInputProps('password')}
@@ -377,7 +416,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 id="register-mobile"
                 type="tel"
                 name="mobile"
-                placeholder="10-digit number"
+                placeholder="e.g. 9876543210"
                 maxLength="10"
                 value={formData.mobile}
                 onChange={handleChange}
@@ -390,6 +429,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 type="password"
                 name="ssn"
                 maxLength="9"
+
                 minLength="9"
                 value={formData.ssn}
                 onChange={handleChange}
@@ -430,7 +470,9 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
                 </div>
               )}
 
-              <button type="submit" className="submit-btn">Register<span className="rocket-icon">🚀</span></button>
+              <div className="centered-btn-wrapper">
+    <button type="submit" className="submit-btn rocket-btn">Register<span className="rocket-icon">🚀</span></button>
+  </div>
             </form>
 
             <p className="switch-link">
@@ -442,9 +484,11 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
           </div>
         )}
 
-        <div className="footer">© 2025 MyCompany. All rights reserved.</div>
-      </div>
+      </div></div>
+              <footer className="footer">© 2025 Vectrolla. All rights reserved.</footer>
+
     </div>
+    
   );
 };
 

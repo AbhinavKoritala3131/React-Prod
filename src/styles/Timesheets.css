@@ -148,6 +148,13 @@ select option:disabled {
 .clock-in {
   background-color: #28a745 !important; /* Green */
 }
+.clock-btn:disabled {
+  background-color: #ddd; /* light gray background */
+  color: #0a0101; /* gray text */
+  cursor: not-allowed; /* show disabled cursor */
+  opacity: 0.6; /* slightly transparent */
+}
+
 
 .clock-out {
   background-color: #ffc107 !important; /* Yellow */
@@ -156,6 +163,18 @@ select option:disabled {
 
 .done {
   background-color: #6c757d !important; /* Gray */
+}
+.rs-picker-toggle {
+  color: black !important;
+}
+
+.project-dropdown .rs-picker-toggle {
+  color: black !important;
+}
+
+.week-selector select {
+  color: black;
+  background-color: white;
 }
 
 
