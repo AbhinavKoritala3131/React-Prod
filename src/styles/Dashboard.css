@@ -50,13 +50,13 @@
 }
 
 /* Company name */
-.company-name {
+.comp-name {
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0;
   position: relative;
   margin-left: -6px;
-  top: -6px; /* Negative = move upward */
+  top: 5px; 
   text-transform: capitalize;
   cursor: pointer;
 }
@@ -230,7 +230,7 @@
     padding: 14px 18px;
   }
 
-  .company-name {
+  .comp-name {
     font-size: 1.2rem;
   }
 

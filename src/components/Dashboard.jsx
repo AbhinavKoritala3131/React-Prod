@@ -119,7 +119,7 @@ const menuButtonRef = useRef(null);
             ☰
           </div>
           <img className="logoheader" src={logo} alt="Vectrolla Logo" />
-          <h1 className="company-name">vectrolla</h1>
+          <h1 className="comp-name">vectrolla</h1>
         </div>
         <div ref={profileRef} className="profile-icon" onClick={() => setProfileOpen(!profileOpen)}>
           👤Profile
