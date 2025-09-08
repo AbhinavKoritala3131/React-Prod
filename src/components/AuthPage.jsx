@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+// import { useNavigate } from 'react-router-dom'; 
 import '../styles/AuthPage.css';
+import logo from '../assets/v.png';
+import { useNavigate, Link } from 'react-router-dom';  // Add Link here
+
 
 const AuthPage = () => {
   const [activeForm, setActiveForm] = useState('signup');
   const [submitError, setSubmitError] = useState(null);
+  const [registerSubmitted, setRegisterSubmitted] = useState(false);
+const [signinSubmitted, setSigninSubmitted] = useState(false);
 
-const navigate = useNavigate(); 
+
+  const navigate = useNavigate(); 
+  
+
+
   // Register form state
   const [formData, setFormData] = useState({
     firstName: '',
@@ -44,36 +53,55 @@ const navigate = useNavigate();
     setFormErrors({});
     setRegisterResponse(null);
     setSigninResponse(null);
+    setSubmitError(null);
+    setRegisterSubmitted(false);  // ✅ Reset
+  setSigninSubmitted(false);   
+  if (formName === 'register') {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      country: '',
+      mobile: '',
+      ssn: '',
+      dob: ''
+    });
+  }
+
+  if (formName === 'signup') {
+    setSigninData({
+      email: '',
+      password: ''
+    });
+  }
   };
 
-  // ========== Register Form Handlers ==========
-
+  // Register form handlers
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setFormErrors((prev) => ({ ...prev, [name]: null }));
     setRegisterResponse(null);
+    setSubmitError(null);
+    setRegisterSubmitted(false); // stops showing error-shadow as user begins to fix errors
+
   };
 
   const validateRegisterForm = () => {
     const errors = {};
 
-    // firstName, lastName: min 2 chars, letters only
-    if (!formData.firstName.trim() || formData.firstName.trim().length < 2 || /\d/.test(formData.firstName)) {
-      errors.firstName = 'First name must be at least 2 letters and contain no numbers';
+    if (!formData.firstName.trim() || formData.firstName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.firstName.trim())) {
+      errors.firstName = 'First name must be at least 2 letters and contain only letters';
     }
-    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 || /\d/.test(formData.lastName)) {
-      errors.lastName = 'Last name must be at least 2 letters and contain no numbers';
+    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.lastName.trim())) {
+      errors.lastName = 'Last name must be at least 2 letters and contain only letters';
     }
-
-    // email required and basic format check
     if (!formData.email.trim()) {
       errors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       errors.email = 'Invalid email format';
     }
-
-    // password: min 8 chars, 1 uppercase, 1 lowercase, 1 number
     if (!formData.password) {
       errors.password = 'Password is required';
     } else if (
@@ -84,27 +112,19 @@ const navigate = useNavigate();
     ) {
       errors.password = 'Password must be at least 8 characters and include uppercase, lowercase, and a number';
     }
-
-    // country required
     if (!formData.country) {
       errors.country = 'Country is required';
     }
-
-    // mobile: exactly 10 digits, digits only
     if (!formData.mobile) {
       errors.mobile = 'Mobile number is required';
     } else if (!/^\d{10}$/.test(formData.mobile)) {
       errors.mobile = 'Mobile number must be exactly 10 digits';
     }
-
-    // ssn: 4 digits only
     if (!formData.ssn) {
       errors.ssn = 'SSN is required';
     } else if (!/^\d{9}$/.test(formData.ssn)) {
       errors.ssn = 'SSN must be exactly 9 digits';
     }
-
-    // dob required
     if (!formData.dob) {
       errors.dob = 'Date of Birth is required';
     }
@@ -113,18 +133,18 @@ const navigate = useNavigate();
     return Object.keys(errors).length === 0;
   };
 
-
   const handleRegisterSubmit = async (e) => {
     e.preventDefault();
+    setRegisterSubmitted(true);
+
     
 
     if (!validateRegisterForm()) {
       setSubmitError('Please fix the errors to register.');
-    return;
-     
-    }   setSubmitError(null);
+      return;
+    }
+    setSubmitError(null);
 
-    // prepend country code if not present
     let fullMobile = formData.mobile;
     const countryCode = countryCodes[formData.country] || '';
     if (!fullMobile.startsWith('+')) {
@@ -167,13 +187,12 @@ const navigate = useNavigate();
       } else {
         setRegisterResponse({ success: false, message: data.message || 'Failed to register user.' });
       }
-    } catch (error) {
+    } catch {
       setRegisterResponse({ success: false, message: 'Something went wrong. Please try again.' });
     }
   };
 
-  // ========== Sign In Handlers ==========
-
+  // Sign In Handlers
   const handleSigninChange = (e) => {
     const { name, value } = e.target;
     setSigninData((prev) => ({ ...prev, [name]: value }));
@@ -182,6 +201,8 @@ const navigate = useNavigate();
 
   const handleSigninSubmit = async (e) => {
     e.preventDefault();
+      setSigninSubmitted(true); // Mark sign-in submitted
+
 
     if (!signinData.email || !signinData.password) {
       setSigninResponse({ success: false, message: 'Please enter email and password' });
@@ -198,16 +219,17 @@ const navigate = useNavigate();
       const data = await response.json();
 
       if (response.ok) {
-         localStorage.setItem('userId', data.userId);
+        localStorage.setItem('userId', data.userId);
         setSigninResponse({ success: true, message: data.message || 'Login successful!' });
         setSigninData({ email: '', password: '' });
+        setSigninSubmitted(false);
         setTimeout(() => {
-    navigate('/Dashboard'); // 🔁 redirect to dashboard
-  }, 1000);
+          navigate('/Dashboard');
+        }, 1000);
       } else {
         setSigninResponse({ success: false, message: data.message || 'Invalid credentials' });
       }
-    } catch (error) {
+    } catch {
       setSigninResponse({ success: false, message: 'Network error. Please try again.' });
     }
   };
@@ -215,17 +237,70 @@ const navigate = useNavigate();
   // ======== Helpers for UI ========
 
   // Add floating red border if error present, also add title for hover tooltip
-  const getInputProps = (field) => ({
-    className: formErrors[field] ? 'input-error' : '',
-    title: formErrors[field] || '',
-  });
+  const getInputProps = (field) => {
+  if (activeForm === 'register') {
+    return {
+      className: formErrors[field] ? 'input-error' : '',
+      title: formErrors[field] || '',
+    };
+  }
+
+  if (activeForm === 'signup' && signinSubmitted) {
+    const isError = field === 'email' && !signinData.email ||
+                    field === 'password' && !signinData.password;
+    return {
+      className: isError ? 'input-error' : '',
+      title: isError ? 'This field is required' : '',
+    };
+  }
+
+  return {};
+};
+
 
   // Add dark red shadow to auth-container if any error on register form or signin error
-  const hasRegisterErrors = Object.keys(formErrors).length > 0;
-  const hasSigninError = signinResponse && !signinResponse.success;
+const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 0;
+   const hasSigninError = signinResponse && !signinResponse.success;
 
+  
   return (
     <div className="auth-page">
+       <header className="auth-header">   
+    <div className="header-left">
+      <img src={logo} alt="Vectrolla Logo" className="company-logo" />
+      
+  <div className="company-info">
+        <h1 className="company-name">Vectrolla</h1>
+
+          <p className="tagline">Drive Business Forward <br/>— <span>All your projects. One platform.</span></p>
+          
+      </div>
+    
+    </div>
+  <div className="header-center">
+    {/* You can put a welcome message, slogan, or leave it empty */
+    }
+  </div>
+  
+  <nav className="header-nav">
+    <ul>
+      <li><Link href="/home">Home</Link></li>
+      <li><Link href="/about-us">About Us</Link></li>
+      <li><Link href="/contact">Contact</Link></li>
+      <li><Link href="/partners">Partners</Link></li>
+    </ul>
+  </nav>
+
+ 
+  </header>
+  <div className="main-content">
+   <div className="left-panel">
+    <h1 className="section-title">What We Do</h1>
+    <p className="section-description">
+      Vectrolla empowers teams with secure, real-time collaboration tools that streamline workflows, automate routine tasks, and scale productivity.
+    — <span>From Clock-In to Project Win!</span></p> 
+  </div>
+       
       <div
   className={`auth-container ${
     (hasRegisterErrors || hasSigninError)
@@ -236,42 +311,43 @@ const navigate = useNavigate();
   }`}
 >
 
-        <div className="header">My Enterprise</div>
-        <p className="tagline">User Portal</p>
-        <h1 className="title">Welcome to User Portal</h1>
+       
+        {/* <p className="tagline">From clock-in to Project win !</p>
+        <h1 className="title">Welcome to User Portal</h1> */}
 
         {activeForm === 'signup' && (
           <div id="signup-form" className="form-card">
             <h2>Sign In</h2>
             <form id="form-signup" noValidate onSubmit={handleSigninSubmit}>
-              <label>Email</label>
+              <label htmlFor="signin-email">Email</label>
               <input
+                id="signin-email"
                 type="email"
                 name="email"
+                placeholder='youremail@gmail.com'
                 value={signinData.email}
                 onChange={handleSigninChange}
                 required
-                title={!signinData.email ? 'Email is required' : ''}
-                className={!signinData.email && hasSigninError ? 'input-error' : ''}
+                {...getInputProps('email')}
               />
 
-              <label>Password</label>
+              <label htmlFor="signin-password">Password</label>
               <input
+                id="signin-password"
                 type="password"
                 name="password"
+                placeholder='********'
                 value={signinData.password}
                 onChange={handleSigninChange}
                 required
-                title={!signinData.password ? 'Password is required' : ''}
-                className={!signinData.password && hasSigninError ? 'input-error' : ''}
+                {...getInputProps('password')}
               />
 
-              <button type="submit" className="submit-btn">
-                Sign In
+              <button type="submit"  className="submit-btn rocket-btn">
+                Sign In<span className="rocket-icon">🚀</span>
               </button>
             </form>
 
-            {/* Dynamic Sign In response */}
             {signinResponse && (
               <div
                 className={`response-message ${signinResponse.success ? 'success' : 'error'}`}
@@ -281,7 +357,7 @@ const navigate = useNavigate();
                   alignItems: 'center',
                   gap: '8px',
                   fontWeight: 'bold',
-                  color: signinResponse.success ? 'white' : 'red',
+                  color: signinResponse.success ? 'white' : 'red'
                 }}
               >
                 {signinResponse.success ? (
@@ -306,44 +382,53 @@ const navigate = useNavigate();
           <div id="register-form" className="form-card">
             <h2>Register</h2>
             <form id="form-register" noValidate onSubmit={handleRegisterSubmit}>
-            {submitError && (
-    <div className="submit-error-message" style={{ color: 'red', marginBottom: '10px' }}>
-      {submitError}
-    </div>
-  )}
-              <label>First Name</label>
+              {submitError && (
+                <div className="submit-error-message" style={{ color: 'red', marginBottom: '10px' }}>
+                  {submitError}
+                </div>
+              )}
+
+              <label htmlFor="register-firstName">First Name</label>
               <input
+                id="register-firstName"
                 type="text"
                 name="firstName"
+                placeholder='e.g. Noah'
                 pattern="^[A-Za-z\s]+$"
                 value={formData.firstName}
                 onChange={handleChange}
                 {...getInputProps('firstName')}
               />
 
-              <label>Last Name</label>
+              <label htmlFor="register-lastName">Last Name</label>
               <input
+                id="register-lastName"
                 type="text"
                 name="lastName"
+                placeholder=' e.g. Dawson'
                 pattern="^[A-Za-z\s]+$"
                 value={formData.lastName}
                 onChange={handleChange}
                 {...getInputProps('lastName')}
               />
 
-              <label>Email</label>
+              <label htmlFor="register-email">Email</label>
               <input
+                id="register-email"
                 type="email"
                 name="email"
+                placeholder='e.g. Noah.dawson@yahoo.com'
                 value={formData.email}
                 onChange={handleChange}
                 {...getInputProps('email')}
               />
 
-              <label>Password</label>
+              <label htmlFor="register-password">Password</label>
               <input
+                id="register-password"
                 type="password"
                 name="password"
+                placeholder='********'
                 value={formData.password}
                 onChange={handleChange}
                 {...getInputProps('password')}
@@ -351,10 +436,11 @@ const navigate = useNavigate();
 
               <label htmlFor="register-country" className="form-label">Country</label>
               <select
+                id="register-country"
                 name="country"
-                className={`styled-select ${formErrors.country ? 'input-error' : ''}`}
                 value={formData.country}
                 onChange={handleChange}
+                className={formErrors.country ? 'input-error' : ''}
                 required
                 title={formErrors.country || ''}
               >
@@ -368,22 +454,25 @@ const navigate = useNavigate();
                 <option value="France">🇫🇷 France</option>
               </select>
 
-              <label>Mobile Number</label>
+              <label htmlFor="register-mobile">Mobile Number</label>
               <input
+                id="register-mobile"
                 type="tel"
                 name="mobile"
-                placeholder="10-digit number"
+                placeholder="e.g. 9876543210"
                 maxLength="10"
                 value={formData.mobile}
                 onChange={handleChange}
                 {...getInputProps('mobile')}
               />
 
-              <label>SSN Last Four Digits</label>
+              <label htmlFor="register-ssn">SSN</label>
               <input
+                id="register-ssn"
                 type="password"
                 name="ssn"
                 maxLength="9"
+
                 minLength="9"
                 value={formData.ssn}
                 onChange={handleChange}
@@ -391,8 +480,9 @@ const navigate = useNavigate();
                 placeholder="***-**-****"
               />
 
-              <label>Date Of Birth</label>
+              <label htmlFor="register-dob">Date Of Birth</label>
               <input
+                id="register-dob"
                 type="date"
                 name="dob"
                 min="1925-01-01"
@@ -402,7 +492,6 @@ const navigate = useNavigate();
                 {...getInputProps('dob')}
               />
 
-              {/* Register response message */}
               {registerResponse && (
                 <div
                   className={`response-message ${registerResponse.success ? 'success' : 'error'}`}
@@ -425,9 +514,10 @@ const navigate = useNavigate();
               )}
 
               <div className="centered-btn-wrapper">
-    <button type="submit" className="submit-btn">Register</button>
+    <button type="submit" className="submit-btn rocket-btn">Register<span className="rocket-icon">🚀</span></button>
   </div>
             </form>
+
             <p className="switch-link">
               Already have an account?{' '}
               <button className="link-btn" onClick={() => showForm('signup')}>
@@ -437,9 +527,11 @@ const navigate = useNavigate();
           </div>
         )}
 
-        <div className="footer">© 2025 MyCompany. All rights reserved.</div>
-      </div>
+      </div></div>
+              <footer className="footer">© 2025 Vectrolla. All rights reserved.</footer>
+
     </div>
+    
   );
 };
 

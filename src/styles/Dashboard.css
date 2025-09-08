@@ -1,14 +1,5 @@
 /* src/styles/Dashboard.css */
 
-.header {
-  position: sticky;
-  top: 0;
-  background: #fff;
-  z-index: 1000;
-  padding: 10px 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
 .dashboard-container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   background: #f4f6f8;
@@ -31,9 +22,55 @@
   z-index: 1100;
 }
 
+/* .company-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+} */
+
+/* Flex wrapper for left section */
+.left-section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Menu icon (☰) */
+.menu-icon {
+  font-size: 1.6rem;
+  cursor: pointer;
+  user-select: none;
+  color: white;
+}
+
+/* Logo image */
+.logoheader {
+  height: 36px;
+  width: auto;
+  object-fit: contain;
+}
+
+/* Company name */
 .company-name {
   font-size: 1.4rem;
   font-weight: 600;
+  margin: 0;
+  position: relative;
+  margin-left: -6px;
+  top: -6px; /* Negative = move upward */
+  text-transform: capitalize;
+  cursor: pointer;
+}
+
+/* Profile icon area */
+.profile-icon {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+  font-size: 1rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .menu-icon {
@@ -42,11 +79,11 @@
   user-select: none;
 }
 
-.profile-icon {
+/* .profile-icon {
   position: relative;
   cursor: pointer;
   user-select: none;
-}
+} */
 
 .profile-dropdown {
   position: absolute;
@@ -81,24 +118,22 @@
 
 .sidebar {
   position: fixed;
-  top: 80px;
   left: 0;
   width: 250px;
-  height: 100%;
-  background: #1e1e2f;
+  /* background: #1e1e2f; */
+  background: #1e1e2f; /* already good */
   padding: 20px 15px;
   box-sizing: border-box;
-  z-index: 1050;
-
+  z-index: 1000;
   /* Animation setup */
   transform: translateX(-100%);
   opacity: 0;
-  transition: transform 0.4s ease, opacity 0.4s ease;
-
+  transition: transform 0.3s ease, opacity 0.3s ease; /* adjusted */
   display: flex;
   flex-direction: column;
   gap: 15px;
-  box-shadow: 10px 10px 60px;
+  box-shadow: 10px 10px 60px rgba(0, 0, 0, 0.3); /* fixed */
+  /* top: 200px; Match the actual header height */
 }
 
 .sidebar.open {
@@ -121,7 +156,6 @@
   color: #0052cc;
   text-decoration: none;
   transition: background-color 0.2s ease;
-
 }
 
 .sidebar button:hover,
@@ -129,7 +163,6 @@
 .sidebar a.active {
   background-color: #c1d4ff;
 }
-
 
 /* Floating welcome card */
 .floating-welcome {
