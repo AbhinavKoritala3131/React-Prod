@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+// import { useNavigate } from 'react-router-dom'; 
 import '../styles/AuthPage.css';
+import logo from '../assets/v.png';
+import { useNavigate, Link } from 'react-router-dom';  // Add Link here
+
 
 const AuthPage = () => {
   const [activeForm, setActiveForm] = useState('signup');
@@ -53,6 +56,25 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     setSubmitError(null);
     setRegisterSubmitted(false);  // ✅ Reset
   setSigninSubmitted(false);   
+  if (formName === 'register') {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      password: '',
+      country: '',
+      mobile: '',
+      ssn: '',
+      dob: ''
+    });
+  }
+
+  if (formName === 'signup') {
+    setSigninData({
+      email: '',
+      password: ''
+    });
+  }
   };
 
   // Register form handlers
@@ -72,7 +94,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     if (!formData.firstName.trim() || formData.firstName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.firstName.trim())) {
       errors.firstName = 'First name must be at least 2 letters and contain only letters';
     }
-    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.firstName.trim())) {
+    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.lastName.trim())) {
       errors.lastName = 'Last name must be at least 2 letters and contain only letters';
     }
     if (!formData.email.trim()) {
@@ -200,6 +222,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
         localStorage.setItem('userId', data.userId);
         setSigninResponse({ success: true, message: data.message || 'Login successful!' });
         setSigninData({ email: '', password: '' });
+        setSigninSubmitted(false);
         setTimeout(() => {
           navigate('/Dashboard');
         }, 1000);
@@ -242,21 +265,41 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
   
   return (
     <div className="auth-page">
-       <header className="auth-header"> VECTROLLA   
-    <p className="tagline">From clock-in to Project win !</p>
-    <h1 className="title">Welcome to User Portal</h1>
+       <header className="auth-header">   
+    <div className="header-left">
+      <img src={logo} alt="Vectrolla Logo" className="company-logo" />
+      
+  <div className="company-info">
+        <h1 className="company-name">Vectrolla</h1>
+
+          <p className="tagline">Drive Business Forward <br/>— <span>All your projects. One platform.</span></p>
+          
+      </div>
+    
+    </div>
+  <div className="header-center">
+    {/* You can put a welcome message, slogan, or leave it empty */
+    }
+  </div>
+  
+  <nav className="header-nav">
+    <ul>
+      <li><Link href="/home">Home</Link></li>
+      <li><Link href="/about-us">About Us</Link></li>
+      <li><Link href="/contact">Contact</Link></li>
+      <li><Link href="/partners">Partners</Link></li>
+    </ul>
+  </nav>
+
+ 
   </header>
   <div className="main-content">
-  <div className="left-side">
-   
-  <h1>From clock-in to project win!</h1>
-  <p>Manage your projects and time effortlessly with our user portal.</p>
-  <ul>
-    <li>Track your tasks</li>
-    <li>Collaborate seamlessly</li>
-    <li>Boost your productivity</li>
-  </ul>
-</div>
+   <div className="left-panel">
+    <h1 className="section-title">What We Do</h1>
+    <p className="section-description">
+      Vectrolla empowers teams with secure, real-time collaboration tools that streamline workflows, automate routine tasks, and scale productivity.
+    — <span>From Clock-In to Project Win!</span></p> 
+  </div>
        
       <div
   className={`auth-container ${
