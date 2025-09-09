@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 // import { useNavigate } from 'react-router-dom'; 
-import '../styles/AuthPage.css';
+import styles from'../styles/AuthPage.module.css';
 import logo from '../assets/v.png';
 import { useNavigate, Link } from 'react-router-dom';  // Add Link here
 
 
 const AuthPage = () => {
-  const [activeForm, setActiveForm] = useState('signup');
+  const [activeForm, setActiveForm] = useState('signin');
   const [submitError, setSubmitError] = useState(null);
   const [registerSubmitted, setRegisterSubmitted] = useState(false);
 const [signinSubmitted, setSigninSubmitted] = useState(false);
@@ -69,7 +69,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     });
   }
 
-  if (formName === 'signup') {
+  if (formName === 'signin') {
     setSigninData({
       email: '',
       password: ''
@@ -87,6 +87,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     setRegisterSubmitted(false); // stops showing error-shadow as user begins to fix errors
 
   };
+  
 
   const validateRegisterForm = () => {
     const errors = {};
@@ -198,7 +199,9 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     setSigninData((prev) => ({ ...prev, [name]: value }));
     setSigninResponse(null);
   };
-
+const validateEmail = (email) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+};
   const handleSigninSubmit = async (e) => {
     e.preventDefault();
       setSigninSubmitted(true); // Mark sign-in submitted
@@ -208,6 +211,10 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
       setSigninResponse({ success: false, message: 'Please enter email and password' });
       return;
     }
+     if (!validateEmail(signinData.email)) {
+    setSigninResponse({ success: false, message: 'Invalid email format' });
+    return;
+  }
 
     try {
       const response = await fetch('http://localhost:8081/users/login', {
@@ -240,21 +247,26 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
   const getInputProps = (field) => {
   if (activeForm === 'register') {
     return {
-      className: formErrors[field] ? 'input-error' : '',
+      className: formErrors[field] ? styles.inputError : '',
       title: formErrors[field] || '',
     };
   }
 
-  if (activeForm === 'signup' && signinSubmitted) {
+  if (activeForm === 'signin' && signinSubmitted) {
     const isError = field === 'email' && !signinData.email ||
                     field === 'password' && !signinData.password;
     return {
-      className: isError ? 'input-error' : '',
+      className: isError ? styles.inputError : '',
       title: isError ? 'This field is required' : '',
     };
   }
 
   return {};
+};
+const getEighteenYearsAgo = () => {
+  const today = new Date();
+  today.setFullYear(today.getFullYear() - 18);
+  return today.toISOString().split('T')[0]; // YYYY-MM-DD
 };
 
 
@@ -264,61 +276,61 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
 
   
   return (
-    <div className="auth-page">
-       <header className="auth-header">   
-    <div className="header-left">
-      <img src={logo} alt="Vectrolla Logo" className="company-logo" />
+    <div className={styles.authPage}>
+       <header className={styles.authHeader}>   
+    <div className={styles.headerLeft}>
+      <img src={logo} alt="Vectrolla Logo" className={styles.companyLogo} />
       
-  <div className="company-info">
-        <h1 className="company-name">Vectrolla</h1>
+  <div className={styles.companyInfo}>
+        <h1 className={styles.companyName}>Vectrolla</h1>
 
-          <p className="tagline">Drive Business Forward <br/>— <span>All your projects. One platform.</span></p>
+          <p className={styles.tagline}>Drive Business Forward <br/>— <span>All your projects. One platform.</span></p>
           
       </div>
     
     </div>
-  <div className="header-center">
+  <div className={styles.headerCenter}>
     {/* You can put a welcome message, slogan, or leave it empty */
     }
   </div>
   
-  <nav className="header-nav">
+  <nav className={styles.headerNav}>
     <ul>
-      <li><Link href="/home">Home</Link></li>
-      <li><Link href="/about-us">About Us</Link></li>
-      <li><Link href="/contact">Contact</Link></li>
-      <li><Link href="/partners">Partners</Link></li>
+      <li><Link to="/home">Home</Link></li>
+      <li><Link to="/about-us">About Us</Link></li>
+      <li><Link to="/contact">Contact</Link></li>
+      <li><Link to="/partners">Partners</Link></li>
     </ul>
   </nav>
 
  
   </header>
-  <div className="main-content">
-   <div className="left-panel">
-    <h1 className="section-title">What We Do</h1>
-    <p className="section-description">
+  <div className={styles.mainContent}>
+   <div className={styles.leftPanel}>
+    <h1 className={styles.sectionTitle}>What We Do</h1>
+    <p className={styles.sectionDescription}>
       Vectrolla empowers teams with secure, real-time collaboration tools that streamline workflows, automate routine tasks, and scale productivity.
     — <span>From Clock-In to Project Win!</span></p> 
   </div>
        
       <div
-  className={`auth-container ${
-    (hasRegisterErrors || hasSigninError)
-      ? 'error-shadow'
-      : (signinResponse?.success || registerResponse?.success)
-      ? 'success-shadow'
-      : ''
-  }`}
+  className={`${styles.authContainer} ${
+            (hasRegisterErrors || hasSigninError)
+              ? styles.errorShadow
+              : (signinResponse?.success || registerResponse?.success)
+              ? styles.successShadow
+              : ''
+          }`}
 >
 
        
         {/* <p className="tagline">From clock-in to Project win !</p>
         <h1 className="title">Welcome to User Portal</h1> */}
 
-        {activeForm === 'signup' && (
-          <div id="signup-form" className="form-card">
+        {activeForm === 'signin' && (
+          <div id="signin-form" className={styles.formCard}>
             <h2>Sign In</h2>
-            <form id="form-signup" noValidate onSubmit={handleSigninSubmit}>
+            <form id="form-signin" noValidate onSubmit={handleSigninSubmit}>
               <label htmlFor="signin-email">Email</label>
               <input
                 id="signin-email"
@@ -343,14 +355,19 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
                 {...getInputProps('password')}
               />
 
-              <button type="submit"  className="submit-btn rocket-btn">
-                Sign In<span className="rocket-icon">🚀</span>
+              {/* <button type="submit"  className="submit-btn rocket-btn"> */}
+                            <button type="submit"  className={`${styles.submitBtn} ${styles.rocketBtn}`}
+>
+
+                Sign In<span className={styles.rocketIcon}>🚀</span>
               </button>
             </form>
 
             {signinResponse && (
               <div
-                className={`response-message ${signinResponse.success ? 'success' : 'error'}`}
+                className={`${styles.statusMsg} ${
+    signinResponse.success ? styles.success : styles.error
+  }`}
                 style={{
                   marginTop: '10px',
                   display: 'flex',
@@ -369,9 +386,9 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
               </div>
             )}
 
-            <p className="switch-link">
+            <p className={styles.switchLink}>
               New user?{' '}
-              <button className="link-btn" onClick={() => showForm('register')}>
+              <button className={styles.linkBtn} onClick={() => showForm('register')}>
                 Create account
               </button>
             </p>
@@ -379,11 +396,11 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
         )}
 
         {activeForm === 'register' && (
-          <div id="register-form" className="form-card">
+          <div id="register-form" className={styles.formCard}>
             <h2>Register</h2>
             <form id="form-register" noValidate onSubmit={handleRegisterSubmit}>
               {submitError && (
-                <div className="submit-error-message" style={{ color: 'red', marginBottom: '10px' }}>
+                <div className={styles.submitErrorMessage} style={{ color: 'red', marginBottom: '10px' }}>
                   {submitError}
                 </div>
               )}
@@ -440,7 +457,8 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
                 name="country"
                 value={formData.country}
                 onChange={handleChange}
-                className={formErrors.country ? 'input-error' : ''}
+                className={formErrors.country ? styles.inputError : ''}
+
                 required
                 title={formErrors.country || ''}
               >
@@ -486,7 +504,7 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
                 type="date"
                 name="dob"
                 min="1925-01-01"
-                max="2007-12-31"
+                max={getEighteenYearsAgo()}
                 value={formData.dob}
                 onChange={handleChange}
                 {...getInputProps('dob')}
@@ -494,7 +512,9 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
 
               {registerResponse && (
                 <div
-                  className={`response-message ${registerResponse.success ? 'success' : 'error'}`}
+                  className={`${styles.statusMsg} ${
+    registerResponse.success ? styles.success : styles.error
+  }`}
                   style={{
                     marginTop: '10px',
                     display: 'flex',
@@ -514,13 +534,13 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
               )}
 
               <div className="centered-btn-wrapper">
-    <button type="submit" className="submit-btn rocket-btn">Register<span className="rocket-icon">🚀</span></button>
+    <button type="submit" className={`${styles.submitBtn} ${styles.rocketBtn}`}>Register<span className="rocket-icon">🚀</span></button>
   </div>
             </form>
 
-            <p className="switch-link">
+            <p className={styles.switchLink}>
               Already have an account?{' '}
-              <button className="link-btn" onClick={() => showForm('signup')}>
+              <button className={styles.linkBtn} onClick={() => showForm('signin')}>
                 Sign in
               </button>
             </p>

@@ -96,10 +96,13 @@ const menuButtonRef = useRef(null);
 }, [menuOpen, profileOpen]);
   //  Clickoutside closed
 
-  const handleLogout = () => {
-    localStorage.removeItem('userId');
+  const handleLogout = async () => {
+  
+    localStorage.clear();
     navigate('/');
-  };
+  
+};
+
 
   if (loading) {
     return <div className="dashboard-loading">Loading dashboard...</div>;
@@ -139,6 +142,7 @@ const menuButtonRef = useRef(null);
           )}
         </div>
       </div>
+      
 
       {/* Sidebar Menu */}
     
@@ -196,6 +200,7 @@ const menuButtonRef = useRef(null);
       {activeComponent === 'projects' && <Projects />}
       {activeComponent === 'timesheets' && <Timesheets />}
     </div>
+    
   );
 };
 export default Dashboard;
