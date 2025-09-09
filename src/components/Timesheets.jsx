@@ -21,14 +21,16 @@ const Timesheets = () => {
 
   const today = new Date();
   const todayStr = today.toDateString();
-  const saveTimesToLocalStorage = (times) => {
-  localStorage.setItem('unsavedTimesheet', JSON.stringify(times));
+  const saveTimesToSessionStorage = (times) => {
+  sessionStorage.setItem('unsavedTimesheet', JSON.stringify(times));
 };
 
-const loadTimesFromLocalStorage = () => {
-  const saved = localStorage.getItem('unsavedTimesheet');
+const loadTimesFromSessionStorage = () => {
+  const saved = sessionStorage.getItem('unsavedTimesheet');
   return saved ? JSON.parse(saved) : {};
 };
+
+
 
 
   // 1. Generate past 2 weeks
@@ -45,15 +47,26 @@ const loadTimesFromLocalStorage = () => {
       weeks.push({ label, start, end });
     }
 
-    setWeekOptions(weeks.reverse());
-    const defaultWeek = weeks[1];
-    setSelectedWeek(defaultWeek.label);
-    setWeekDays(generateWeekDays(defaultWeek.start));
+    const reversedWeeks = weeks.reverse();
+setWeekOptions(reversedWeeks);
+
+const savedWeek = sessionStorage.getItem('selectedWeek');
+const defaultWeek = reversedWeeks.find(w => w.label === savedWeek) || reversedWeeks[1];
+
+setSelectedWeek(defaultWeek.label);
+setWeekDays(generateWeekDays(defaultWeek.start));
+
   }, []);
+  useEffect(() => {
+  if (selectedWeek) {
+    sessionStorage.setItem('selectedWeek', selectedWeek);
+  }
+}, [selectedWeek]);
+
 useEffect(() => {
-  const saved = loadTimesFromLocalStorage();
+  const saved = loadTimesFromSessionStorage();
   if (saved) setTimes(saved);
-  const savedSubmitted = loadSubmittedWeeksFromLocalStorage();
+  const savedSubmitted = loadSubmittedWeeksFromSessionStorage();
   if (savedSubmitted) setSubmittedWeeks(savedSubmitted);
 }, []);
 
@@ -63,7 +76,7 @@ useEffect(() => {
     if (selected) {
       setWeekDays(generateWeekDays(selected.start));
     }
-  }, [selectedWeek]);
+  }, [selectedWeek, weekOptions]);
 
   // 3. Mock projects
   useEffect(() => {
@@ -148,27 +161,50 @@ const dateToTimeString = (date) => {
 
 
 
-const handleClock = (dateStr) => {
-  if (!canFillWeek(selectedWeek, dateStr)) return;
+// // const handleClock = async (dateStr) => {
+// //   if (!canFillWeek(selectedWeek, dateStr)) return;
 
-  const now = new Date().toTimeString().slice(0, 5);
+// //   const now = dateToTimeString(new Date()); // e.g., "08:30 AM"
 
-  setTimes((prev) => {
-    const entry = prev[dateStr] || {};
-    const updated = { ...entry };
+// //   setTimes((prev) => {
+// //     const entry = prev[dateStr] || {};
+// //     const updated = { ...entry };
 
-    if (!entry.start) {
-      updated.start = now;
-    } else if (!entry.end) {
-      updated.end = now;
-      updated.total = calculateDailyHours(entry.start, now);
-    }
+// //     let clockStatus;
 
-    const updatedTimes = { ...prev, [dateStr]: updated };
-    saveTimesToLocalStorage(updatedTimes);
-    return updatedTimes;
-  });
-};
+// //     if (!entry.start) {
+// //       updated.start = now;
+// //       clockStatus = 'CLOCK_IN';
+// //     } else if (!entry.end) {
+// //       updated.end = now;
+// //       updated.total = calculateDailyHours(updated.start, now);
+// //       clockStatus = 'CLOCK_OUT';
+// //     }
+
+// //     const updatedTimes = { ...prev, [dateStr]: updated };
+// //     saveTimesToSessionStorage(updatedTimes);
+
+// //     // Send clock info to backend
+// //     if (clockStatus) {
+// //       const payload = {
+// //         userId,
+// //         date: dateStr,
+// //         start: clockStatus === 'CLOCK_IN' ? now : null,
+// //         end: clockStatus === 'CLOCK_OUT' ? now : null,
+// //         status: clockStatus
+// //       };
+// //       console.log("Sending clock payload:", payload);
+
+// //       api.post('/tsManage/clock', payload)
+// //         .catch(err => {
+// //           console.error('Clock POST failed', err);
+// //           alert('Clock action failed. Please try again.');
+// //         });
+// //     }
+
+//     return updatedTimes;
+//   });
+// };
 
 
 
@@ -199,13 +235,13 @@ const formatDecimalHoursToHHmm = (decimalHours) => {
   return `${hours}:${minutesStr}`;
 };
 
-const userId = Number(localStorage.getItem('userId'));
-const saveSubmittedWeeksToLocalStorage = (weeks) => {
-  localStorage.setItem('submittedWeeks', JSON.stringify(weeks));
+const userId = Number(sessionStorage.getItem('userId'));
+const saveSubmittedWeeksToSessionStorage = (weeks) => {
+  sessionStorage.setItem('submittedWeeks', JSON.stringify(weeks));
 };
 
-const loadSubmittedWeeksFromLocalStorage = () => {
-  const saved = localStorage.getItem('submittedWeeks');
+const loadSubmittedWeeksFromSessionStorage = () => {
+  const saved = sessionStorage.getItem('submittedWeeks');
   return saved ? JSON.parse(saved) : [];
 };
 
@@ -238,7 +274,7 @@ const handleManualChange = (dateStr, field, value) => {
       }
     }
     const updatedTimes = { ...prev, [dateStr]: updated };
-    saveTimesToLocalStorage(updatedTimes);
+    saveTimesToSessionStorage(updatedTimes);
     return updatedTimes;
   });
 };
@@ -308,12 +344,12 @@ if (hasErrors) {
       week: selectedWeek,
       entries: dataToSend,
     });
-    localStorage.removeItem('unsavedTimesheet');
+    sessionStorage.removeItem('unsavedTimesheet');
       const newSubmittedWeeks = [...submittedWeeks, selectedWeek];
   setSubmittedWeeks(newSubmittedWeeks);
-  saveSubmittedWeeksToLocalStorage(newSubmittedWeeks);
+  saveSubmittedWeeksToSessionStorage(newSubmittedWeeks);
     setShowSuccess(true);
-    setSubmittedWeeks(prev => [...prev, selectedWeek]);
+    // setSubmittedWeeks(prev => [...prev, selectedWeek]);
 
     setTimeout(() => {
       setShowSuccess(false);
@@ -358,10 +394,18 @@ const allWeeksSubmitted = weekOptions.every(week =>
   submittedWeeks.includes(week.label)
 );
 
-
+const hasUnsavedData = Object.keys(times || {}).length > 0;
+const isSubmitted = submittedWeeks.includes(selectedWeek);
   return (
     <div className={styles.timesheetContainer}>
       <h2>🕒 Weekly Timesheet</h2>
+      
+{hasUnsavedData && !isSubmitted && (
+  <div className={styles.reminderBanner}>
+    ⚠️ Don't forget to submit your timesheet before logging out!
+  </div>
+)}
+
 
       <div className={styles.weekSelector}>
         <label>Select Week:</label>
@@ -422,7 +466,7 @@ const allWeeksSubmitted = weekOptions.every(week =>
             <th>Date</th>
             <th>Start</th>
             <th>End</th>
-            <th>Clock</th>
+            {/* <th>Clock</th> */}
             <th>Total</th>
           </tr>
         </thead>
@@ -487,7 +531,7 @@ const allWeeksSubmitted = weekOptions.every(week =>
 )}
 </td>
 
-                <td>
+                {/* <td>
   {isToday &&  (
     <button 
       disabled={isWeekend}
@@ -499,7 +543,7 @@ const allWeeksSubmitted = weekOptions.every(week =>
       {!entry.start ? 'Clock In' : !entry.end ? 'Clock Out' : 'Done'}
     </button>
   )}
-</td>
+</td> */}
 
                 <td>{formatDecimalHoursToHHmm(entry.total) || '0:00'} hrs</td>
               </tr>

@@ -2,7 +2,8 @@
 
 .dashboard-container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f8;
+  /* background: #f4f6f8; */
+  background-color: black;
   min-height: 100vh;
   margin: 0;
   padding: 0;

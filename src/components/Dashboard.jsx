@@ -7,6 +7,7 @@ import logo from '../assets/v.png';
 import PersonalInfo from './personalInfo';
 import Projects from './Projects';
 import Timesheets from './Timesheets';
+import ClockWidget from './ClockWidget';
 
 
 
@@ -27,7 +28,7 @@ const menuButtonRef = useRef(null);
 
   const navigate = useNavigate();
 
-  const userId = Number(localStorage.getItem('userId'));
+  const userId = Number(sessionStorage.getItem('userId'));
   
     
 
@@ -97,11 +98,13 @@ const menuButtonRef = useRef(null);
   //  Clickoutside closed
 
   const handleLogout = async () => {
+    
   
-    localStorage.clear();
+    sessionStorage.clear();
     navigate('/');
   
 };
+
 
 
   if (loading) {
@@ -199,6 +202,18 @@ const menuButtonRef = useRef(null);
       {activeComponent === 'personalInfo' && <PersonalInfo user={user} />}
       {activeComponent === 'projects' && <Projects />}
       {activeComponent === 'timesheets' && <Timesheets />}
+      {activeComponent === 'home' && (
+  <>
+    {/* existing floating welcome */}
+    <ClockWidget 
+  userId={userId}
+  userName={user?.fName}
+  submittedWeeks={JSON.parse(sessionStorage.getItem('submittedWeeks') || '[]')}
+/>
+
+  </>
+)}
+
     </div>
     
   );

@@ -145,25 +145,24 @@ select option:disabled {
 .rocketBtn:hover {
   background-color: #0056b3;
 }
-.clockIn {
-  background-color: #28a745 !important; /* Green */
+/* .clockIn {
+  background-color: #28a745 !important; 
 }
 .clockBtn:disabled {
-  background-color: #ddd; /* light gray background */
-  color: #0a0101; /* gray text */
-  cursor: not-allowed; /* show disabled cursor */
-  opacity: 0.6; /* slightly transparent */
-}
+  background-color: #ddd; 
+  color: #0a0101; 
+  cursor: not-allowed; 
+  opacity: 0.6;
 
 
 .clockOut {
-  background-color: #ffc107 !important; /* Yellow */
+  background-color: #ffc107 !important; 
   color: black !important;
 }
 
 .done {
-  background-color: #6c757d !important; /* Gray */
-}
+  background-color: #6c757d !important; 
+} */
 .rsPickerToggle{
   color: black !important;
 }
@@ -190,5 +189,14 @@ select option:disabled {
   margin-top: 4px;
 }
 
+.reminderBanner {
+  background-color: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+  padding: 10px;
+  margin: 15px 0;
+  border-radius: 4px;
+  text-align: center;
+}
 
 

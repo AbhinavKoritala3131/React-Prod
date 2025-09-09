@@ -226,7 +226,7 @@ const validateEmail = (email) => {
       const data = await response.json();
 
       if (response.ok) {
-        localStorage.setItem('userId', data.userId);
+        sessionStorage.setItem('userId', data.userId);
         setSigninResponse({ success: true, message: data.message || 'Login successful!' });
         setSigninData({ email: '', password: '' });
         setSigninSubmitted(false);
