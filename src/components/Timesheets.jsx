@@ -161,57 +161,6 @@ const dateToTimeString = (date) => {
 
 
 
-// // const handleClock = async (dateStr) => {
-// //   if (!canFillWeek(selectedWeek, dateStr)) return;
-
-// //   const now = dateToTimeString(new Date()); // e.g., "08:30 AM"
-
-// //   setTimes((prev) => {
-// //     const entry = prev[dateStr] || {};
-// //     const updated = { ...entry };
-
-// //     let clockStatus;
-
-// //     if (!entry.start) {
-// //       updated.start = now;
-// //       clockStatus = 'CLOCK_IN';
-// //     } else if (!entry.end) {
-// //       updated.end = now;
-// //       updated.total = calculateDailyHours(updated.start, now);
-// //       clockStatus = 'CLOCK_OUT';
-// //     }
-
-// //     const updatedTimes = { ...prev, [dateStr]: updated };
-// //     saveTimesToSessionStorage(updatedTimes);
-
-// //     // Send clock info to backend
-// //     if (clockStatus) {
-// //       const payload = {
-// //         userId,
-// //         date: dateStr,
-// //         start: clockStatus === 'CLOCK_IN' ? now : null,
-// //         end: clockStatus === 'CLOCK_OUT' ? now : null,
-// //         status: clockStatus
-// //       };
-// //       console.log("Sending clock payload:", payload);
-
-// //       api.post('/tsManage/clock', payload)
-// //         .catch(err => {
-// //           console.error('Clock POST failed', err);
-// //           alert('Clock action failed. Please try again.');
-// //         });
-// //     }
-
-//     return updatedTimes;
-//   });
-// };
-
-
-
-
-
-
-
   const calculateDailyHours = (startStr, endStr) => {
   if (!startStr || !endStr) return 0;
 
@@ -478,6 +427,8 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
     const isToday = day.fullDate === todayStr;
     const dateObj = new Date(day.fullDate);
     const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+    const isFutureDay = dateObj > today;
+
 
 
             return (
@@ -505,7 +456,7 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
     showMeridiem={true} 
 
     placeholder="Start time"
-    disabled={isWeekend}
+    disabled={isWeekend|| isFutureDay}
   />
   {entry.error && (
   <div className={styles.errorText}>{entry.error}</div>
@@ -523,7 +474,7 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
     }}
     showMeridiem={true} 
     placeholder="End time"
-    disabled={isWeekend}
+    disabled={isWeekend || isFutureDay}
     
   />
   {entry.error && (

@@ -356,14 +356,14 @@ textarea:focus {
 
 .statusMsg.success {
   color: #1565c0;
-  background-color: #107d95;
-  border: 1px solid #90caf9;
+  /* background-color: #107d95;
+  border: 1px solid #90caf9; */
 }
 
 .statusMsg.error {
   color: #c62828;
-  background-color: #ffebee;
-  border: 1px solid #ef9a9a;
+  /* background-color: #ffebee;
+  border: 1px solid #ef9a9a; */
 }
 .submitErrorMessage {
   color: red;
