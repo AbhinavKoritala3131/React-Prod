@@ -126,6 +126,7 @@ const Dashboard = () => {
       start: isClockedIn ? null : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       end: isClockedIn ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
       status: isClockedIn ? 'CLOCK_OUT' : 'CLOCK_IN'
+      
     };
 
     fetch('http://localhost:8081/tsManage/clock', {

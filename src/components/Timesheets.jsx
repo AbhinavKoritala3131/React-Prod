@@ -17,7 +17,16 @@ const Timesheets = () => {
   const [selectedProject, setSelectedProject] = useState('');
   const [submittedWeeks, setSubmittedWeeks] = useState([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [weekStatuses, setWeekStatuses] = useState({
+    
+  currentWeek: null,
+  previousWeek: null,
+});
+const [weekType, setWeekType] = useState('');
+
   
+const isWeekSubmitted = submittedWeeks.includes(selectedWeek);
+// Then disable inputs and buttons accordingly
 
   const today = new Date();
   const todayStr = today.toDateString();
@@ -62,6 +71,31 @@ setWeekDays(generateWeekDays(defaultWeek.start));
     sessionStorage.setItem('selectedWeek', selectedWeek);
   }
 }, [selectedWeek]);
+useEffect(() => {
+  const fetchWeekStatuses = async () => {
+    try {
+    const userId = Number(sessionStorage.getItem('userId'));
+    const response = await api.get(`/tsManage/updatedWeeks?id=${userId}`);
+    const { currentWeek, previousWeek } = response.data;
+    setWeekStatuses({ currentWeek, previousWeek });
+
+    // determine weekType based on selectedWeek
+    if (selectedWeek === weekOptions[1]?.label) {
+      setWeekType('CURRENT');
+    } else if (selectedWeek === weekOptions[0]?.label) {
+      setWeekType('PREVIOUS');
+    } else {
+      setWeekType('OLDER');
+    }
+  } catch (error) {
+    console.error('Error fetching week statuses', error);
+  }
+};
+  if (selectedWeek && weekOptions.length > 0) {
+    fetchWeekStatuses();
+  }
+}, [selectedWeek, weekOptions]);
+
 
 useEffect(() => {
   const saved = loadTimesFromSessionStorage();
@@ -291,6 +325,8 @@ if (hasErrors) {
   try {
     await api.post('tsManage/submit', {
       week: selectedWeek,
+      weekTotal: totalWeekHours.toFixed(2), // <-- NEW FIELD
+      weekType:weekType,
       entries: dataToSend,
     });
     sessionStorage.removeItem('unsavedTimesheet');
@@ -298,6 +334,7 @@ if (hasErrors) {
   setSubmittedWeeks(newSubmittedWeeks);
   saveSubmittedWeeksToSessionStorage(newSubmittedWeeks);
     setShowSuccess(true);
+    setTimes({});
     // setSubmittedWeeks(prev => [...prev, selectedWeek]);
 
     setTimeout(() => {
@@ -363,19 +400,35 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
           value={selectedWeek}
           onChange={(e) => setSelectedWeek(e.target.value)}
         >
-          {weekOptions.map((week) => {
-  const isSubmitted = submittedWeeks.includes(week.label);
+          {weekOptions.map((week, idx) => {
+  const isCurrent = idx === 1;
+  const isPrevious = idx === 0;
+  const isSubmitted =
+    (isCurrent && weekStatuses.currentWeek === 'SUBMITTED') ||
+    (isPrevious && weekStatuses.previousWeek === 'SUBMITTED');
+
+  const isAllowedToEdit =
+    (isCurrent && (!weekStatuses.currentWeek || weekStatuses.currentWeek === 'PENDING')) ||
+    (isPrevious && (!weekStatuses.previousWeek || weekStatuses.previousWeek === 'PENDING'));
+
   return (
     <option
       key={week.label}
       value={week.label}
-      disabled={isSubmitted}
-      title={isSubmitted ? 'Already submitted, contact your admin to edit' : ''}
+      disabled={!isAllowedToEdit}
+      title={
+        isSubmitted
+          ? 'Already submitted'
+          : !isAllowedToEdit
+          ? 'Editing not allowed'
+          : ''
+      }
     >
       {week.label} {isSubmitted && '✅ Submitted'}
     </option>
   );
 })}
+
 
         </select>
         <span className={styles.monthDisplay}>
@@ -456,7 +509,7 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
     showMeridiem={true} 
 
     placeholder="Start time"
-    disabled={isWeekend|| isFutureDay}
+    disabled={isWeekend|| isFutureDay|| isWeekSubmitted}
   />
   {entry.error && (
   <div className={styles.errorText}>{entry.error}</div>
@@ -474,7 +527,7 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
     }}
     showMeridiem={true} 
     placeholder="End time"
-    disabled={isWeekend || isFutureDay}
+    disabled={isWeekend || isFutureDay|| isWeekSubmitted}
     
   />
   {entry.error && (
@@ -503,12 +556,12 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
         </tbody>
       </table>
     </div>
-     {!submittedWeeks.includes(selectedWeek) && !allWeeksSubmitted && (
+     {!isWeekSubmitted &&  !allWeeksSubmitted && (
   <div style={{ textAlign: 'center', marginTop: '30px' }}>
     <button
       className={`${styles.submitBtn} ${styles.rocketBtn}`}
       onClick={handleSendForApproval}
-      disabled={!isSendEnabled()}
+      disabled={!isSendEnabled()|| isWeekSubmitted}
       title={
         isSendEnabled()
           ? 'Submit this timesheet for approval'
