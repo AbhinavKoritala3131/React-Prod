@@ -71,30 +71,7 @@ setWeekDays(generateWeekDays(defaultWeek.start));
     sessionStorage.setItem('selectedWeek', selectedWeek);
   }
 }, [selectedWeek]);
-useEffect(() => {
-  const fetchWeekStatuses = async () => {
-    try {
-    const userId = Number(sessionStorage.getItem('userId'));
-    const response = await api.get(`/tsManage/updatedWeeks?id=${userId}`);
-    const { currentWeek, previousWeek } = response.data;
-    setWeekStatuses({ currentWeek, previousWeek });
 
-    // determine weekType based on selectedWeek
-    if (selectedWeek === weekOptions[1]?.label) {
-      setWeekType('CURRENT');
-    } else if (selectedWeek === weekOptions[0]?.label) {
-      setWeekType('PREVIOUS');
-    } else {
-      setWeekType('OLDER');
-    }
-  } catch (error) {
-    console.error('Error fetching week statuses', error);
-  }
-};
-  if (selectedWeek && weekOptions.length > 0) {
-    fetchWeekStatuses();
-  }
-}, [selectedWeek, weekOptions]);
 
 
 useEffect(() => {
@@ -190,8 +167,9 @@ const timeStringToDate = (timeStr) => {
 // Convert Date object to "hh:mm AM/PM" string
 const dateToTimeString = (date) => {
   if (!date) return '';
-  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+return date.toTimeString().slice(0, 8); // e.g., "08:30:00"
 };
+
 
 
 
@@ -274,6 +252,7 @@ const handleManualChange = (dateStr, field, value) => {
     const dayNum = new Date(day.fullDate).getDay();
     return dayNum >= 1 && dayNum <= 5; // Monday to Friday
   });
+  console.log('times for submission:', times);
 
   // Validate all entries before submission
   let hasErrors = false;
@@ -316,18 +295,23 @@ if (hasErrors) {
 
   const dataToSend = weekDaysToSend.map(day => ({
     userId,
-    date: day.fullDate,
+    date:  new Date(day.fullDate).toISOString().slice(0, 10), // "YYYY-MM-DD"
+
     ...times[day.fullDate],
     project: selectedProject,
     week: selectedWeek,
   }));
+  console.log('dataToSend:', dataToSend);  // <-- Add this too
+
 
   try {
     await api.post('tsManage/submit', {
+      userId,
       week: selectedWeek,
       weekTotal: totalWeekHours.toFixed(2), // <-- NEW FIELD
       weekType:weekType,
       entries: dataToSend,
+      
     });
     sessionStorage.removeItem('unsavedTimesheet');
       const newSubmittedWeeks = [...submittedWeeks, selectedWeek];
@@ -400,34 +384,22 @@ const isSubmitted = submittedWeeks.includes(selectedWeek);
           value={selectedWeek}
           onChange={(e) => setSelectedWeek(e.target.value)}
         >
-          {weekOptions.map((week, idx) => {
-  const isCurrent = idx === 1;
-  const isPrevious = idx === 0;
-  const isSubmitted =
-    (isCurrent && weekStatuses.currentWeek === 'SUBMITTED') ||
-    (isPrevious && weekStatuses.previousWeek === 'SUBMITTED');
-
-  const isAllowedToEdit =
-    (isCurrent && (!weekStatuses.currentWeek || weekStatuses.currentWeek === 'PENDING')) ||
-    (isPrevious && (!weekStatuses.previousWeek || weekStatuses.previousWeek === 'PENDING'));
+         {weekOptions.map((week) => {
+  const isSubmitted = submittedWeeks.includes(week.label);
 
   return (
     <option
       key={week.label}
       value={week.label}
-      disabled={!isAllowedToEdit}
-      title={
-        isSubmitted
-          ? 'Already submitted'
-          : !isAllowedToEdit
-          ? 'Editing not allowed'
-          : ''
-      }
+      disabled={isSubmitted}
+      title={isSubmitted ? 'Already submitted' : ''}
     >
       {week.label} {isSubmitted && '✅ Submitted'}
     </option>
   );
 })}
+
+
 
 
         </select>

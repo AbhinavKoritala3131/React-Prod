@@ -122,9 +122,13 @@ const Dashboard = () => {
   const handleClock = () => {
     const payload = {
       userId,
-      date: new Date().toDateString(),
-      start: isClockedIn ? null : new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      end: isClockedIn ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : null,
+      date: new Date().toISOString().slice(0, 10),  // e.g. "2025-09-11"
+      start: isClockedIn ? null : new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit',hour12: false })
+// e.g. "11:24"
+,
+      end: isClockedIn ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit',second: '2-digit', hour12: false })
+// e.g. "11:24"
+ : null,
       status: isClockedIn ? 'CLOCK_OUT' : 'CLOCK_IN'
       
     };
