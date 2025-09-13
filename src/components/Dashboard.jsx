@@ -3,7 +3,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Dashboard.css';
 import logo from '../assets/v.png';
-
+import ManageTimesheets from './adminOnly/ManageTimesheets'
 
 import PersonalInfo from './personalInfo';
 import Projects from './Projects';
@@ -19,6 +19,7 @@ const Dashboard = () => {
   const [isClockedIn, setIsClockedIn] = useState(() => {
     return sessionStorage.getItem('isClockedIn') === 'true';
   });
+const role = sessionStorage.getItem('role'); // e.g., 'USER' or 'ADMIN'
 
   const headerRef = useRef(null);
   const sidebarRef = useRef(null);
@@ -28,6 +29,13 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const userId = Number(sessionStorage.getItem('userId'));
 
+
+  useEffect(() => {
+  const adminOnly = ['ManageTimesheets', 'adminReports'];
+  if (adminOnly.includes(activeComponent) && role !== 'ADMIN') {
+    setActiveComponent('home');
+  }
+}, [activeComponent, role]);
   // Redirect if no userId
   useEffect(() => {
     if (!userId) {
@@ -43,6 +51,9 @@ const Dashboard = () => {
         }
       });
     };
+    // MORE SECURITY FOR COMPONENT SPOOFING USING DEV TOOLS
+    
+
 
     updateHeaderHeight();
     window.addEventListener('resize', updateHeaderHeight);
@@ -226,6 +237,13 @@ const Dashboard = () => {
         >
           📁 Projects
         </button>
+        {role === 'ADMIN' && (
+    <>
+      <button onClick={() => { setActiveComponent('ManageTimesheets'); setMenuOpen(false); }}>🗓️ Manage Timesheets</button>
+      <button onClick={() => { setActiveComponent('adminReports'); setMenuOpen(false); }}>📊 Admin Reports</button>
+    </>
+  )}
+  
 
       </div>
       {activeComponent === 'personalInfo' && <PersonalInfo user={user} />}
@@ -240,6 +258,8 @@ const Dashboard = () => {
   {isClockedIn ? 'Clock Out' : 'Clock In'}
 </button>
 }
+{activeComponent === 'ManageTimesheets' && role === 'ADMIN' && <ManageTimesheets />}
+
 
 
     </div>

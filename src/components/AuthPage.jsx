@@ -227,10 +227,13 @@ const validateEmail = (email) => {
 
       if (response.ok) {
         sessionStorage.setItem('userId', data.userId);
+        sessionStorage.setItem('role',data.role)
         setSigninResponse({ success: true, message: data.message || 'Login successful!' });
         setSigninData({ email: '', password: '' });
         setSigninSubmitted(false);
         setTimeout(() => {
+          console.log('Login response:', data);
+
           navigate('/Dashboard');
         }, 1000);
       } else {

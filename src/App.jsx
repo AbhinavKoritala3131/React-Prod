@@ -6,6 +6,7 @@ import AuthPage from './components/AuthPage.jsx';
 import Dashboard from './components/Dashboard.jsx'; 
 import PersonalInfo from './components/personalInfo.jsx';
 import Timesheets from './components/Timesheets.jsx';
+import ManageTimesheets from './components/adminOnly/ManageTimesheets.jsx';
 
 const App = () => {
   return (
@@ -15,6 +16,8 @@ const App = () => {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/personalInfo" element={<PersonalInfo />} />
         <Route path="/timesheets" element={<Timesheets />} />
+        <Route path="/manageTimesheets" element={<ManageTimesheets />} />
+
 
 
       </Routes>

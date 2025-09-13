@@ -43,6 +43,22 @@ const loadTimesFromSessionStorage = () => {
 
 
   // 1. Generate past 2 weeks
+    const generateWeekDays = (start) => {
+    const days = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start);
+      d.setDate(start.getDate() + i);
+      days.push({
+        label: d.toLocaleDateString('default', {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+        }),
+        fullDate: d.toDateString(),
+      });
+    }
+    return days;
+  };
   useEffect(() => {
     const weeks = [];
     const current = new Date();
@@ -66,6 +82,51 @@ setSelectedWeek(defaultWeek.label);
 setWeekDays(generateWeekDays(defaultWeek.start));
 
   }, []);
+  const userId = Number(sessionStorage.getItem('userId'));
+  const fetchWeekStatuses = async (weeks, userId) => {
+  console.log('fetchWeekStatuses called with:', weeks, userId);
+  try {
+    const res = await api.post('/tsManage/status-check', {
+      empId: userId,
+      weeks,
+    });
+    console.log('API response:', res.data);
+
+    const { previous: prevStatus, current: currStatus } = res.data;
+
+    setWeekStatuses({
+      previousWeek: prevStatus || null,
+      currentWeek: currStatus || null,
+    });
+
+    const submitted = [];
+    if (prevStatus === 'SUBMITTED') submitted.push(weeks[0]);
+    if (currStatus === 'SUBMITTED') submitted.push(weeks[1]);
+
+    console.log('Setting submitted weeks:', submitted);
+    setSubmittedWeeks(submitted);
+  } catch (err) {
+    console.error('Error fetching week statuses:', err);
+  }
+};
+
+
+ useEffect(() => {
+  
+
+    if (weekOptions.length === 2 && userId) {
+    const previous = weekOptions[0].label;
+    const current = weekOptions[1].label;
+    fetchWeekStatuses([previous, current], userId);
+  }
+
+}, [selectedWeek,  userId]); // ✅ Add selectedWeek and weekOptions.length
+useEffect(() => {
+  console.log('submittedWeeks:', submittedWeeks);
+  console.log('weekOptions:', weekOptions);
+  console.log('selectedWeek:', selectedWeek);
+}, [submittedWeeks, weekOptions, selectedWeek]);
+
   useEffect(() => {
   if (selectedWeek) {
     sessionStorage.setItem('selectedWeek', selectedWeek);
@@ -74,12 +135,6 @@ setWeekDays(generateWeekDays(defaultWeek.start));
 
 
 
-useEffect(() => {
-  const saved = loadTimesFromSessionStorage();
-  if (saved) setTimes(saved);
-  const savedSubmitted = loadSubmittedWeeksFromSessionStorage();
-  if (savedSubmitted) setSubmittedWeeks(savedSubmitted);
-}, []);
 
   // 2. Update week days on week change
   useEffect(() => {
@@ -96,22 +151,7 @@ useEffect(() => {
     setSelectedProject(mockProjects[0]);
   }, []);
 
-  const generateWeekDays = (start) => {
-    const days = [];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(start);
-      d.setDate(start.getDate() + i);
-      days.push({
-        label: d.toLocaleDateString('default', {
-          weekday: 'short',
-          month: 'short',
-          day: 'numeric',
-        }),
-        fullDate: d.toDateString(),
-      });
-    }
-    return days;
-  };
+
   const canFillWeek = (selectedWeekLabel, dateStrToFill = null) => {
   const selectedWeekIndex = weekOptions.findIndex(w => w.label === selectedWeekLabel);
   if (selectedWeekIndex === -1) return false;
@@ -196,15 +236,6 @@ const formatDecimalHoursToHHmm = (decimalHours) => {
   return `${hours}:${minutesStr}`;
 };
 
-const userId = Number(sessionStorage.getItem('userId'));
-const saveSubmittedWeeksToSessionStorage = (weeks) => {
-  sessionStorage.setItem('submittedWeeks', JSON.stringify(weeks));
-};
-
-const loadSubmittedWeeksFromSessionStorage = () => {
-  const saved = sessionStorage.getItem('submittedWeeks');
-  return saved ? JSON.parse(saved) : [];
-};
 
 
 const handleManualChange = (dateStr, field, value) => {
@@ -240,6 +271,18 @@ const handleManualChange = (dateStr, field, value) => {
   });
 };
 
+useEffect(() => {
+  const restored = loadTimesFromSessionStorage();
+
+  if (
+    restored &&
+    Object.keys(restored).length > 0 &&
+    selectedWeek &&
+    !submittedWeeks.includes(selectedWeek)
+  ) {
+    setTimes(restored);
+  }
+}, [submittedWeeks, selectedWeek]);
 
 
 
@@ -250,7 +293,9 @@ const handleManualChange = (dateStr, field, value) => {
   const selected = weekOptions.find(w => w.label === selectedWeek);
   const weekDaysToSend = generateWeekDays(selected.start).filter(day => {
     const dayNum = new Date(day.fullDate).getDay();
+    
     return dayNum >= 1 && dayNum <= 5; // Monday to Friday
+    
   });
   console.log('times for submission:', times);
 
@@ -305,36 +350,64 @@ if (hasErrors) {
 
 
   try {
-    await api.post('tsManage/submit', {
-      userId,
-      week: selectedWeek,
-      weekTotal: totalWeekHours.toFixed(2), // <-- NEW FIELD
-      weekType:weekType,
-      entries: dataToSend,
-      
-    });
-    sessionStorage.removeItem('unsavedTimesheet');
-      const newSubmittedWeeks = [...submittedWeeks, selectedWeek];
-  setSubmittedWeeks(newSubmittedWeeks);
-  saveSubmittedWeeksToSessionStorage(newSubmittedWeeks);
-    setShowSuccess(true);
-    setTimes({});
-    // setSubmittedWeeks(prev => [...prev, selectedWeek]);
+  await api.post('tsManage/submit', {
+    userId,
+    week: selectedWeek,
+    weekTotal: totalWeekHours.toFixed(2),
+    weekType: weekType,
+    entries: dataToSend,
+  });
 
-    setTimeout(() => {
-      setShowSuccess(false);
-      const currentWeek = weekOptions.find((w) =>
-        new Date() >= w.start && new Date() <= w.end
-      );
-      if (currentWeek) {
-        setSelectedWeek(currentWeek.label);
-      }
-    }, 3000);
-  } catch (err) {
-    alert('Failed to submit timesheet');
-    console.error(err);
-  }
-};
+  sessionStorage.removeItem('unsavedTimesheet');
+  setShowSuccess(true);
+  setTimes({});
+
+  // ✅ Re-fetch week statuses from backend
+  const fetchWeekStatuses = async () => {
+    if (weekOptions.length === 0) return;
+
+    const previous = weekOptions[0]?.label;
+    const current = weekOptions[1]?.label;
+
+    try {
+      const res = await api.post('/tsManage/status-check', {
+        empId: userId,
+        weeks: [previous, current]
+      });
+
+      const { previous: prevStatus, current: currStatus } = res.data;
+      setWeekStatuses({
+        previousWeek: prevStatus || null,
+        currentWeek: currStatus || null
+      });
+
+      const submitted = [];
+      if (prevStatus === 'SUBMITTED') submitted.push(previous);
+      if (currStatus === 'SUBMITTED') submitted.push(current);
+      setSubmittedWeeks(submitted);
+
+    } catch (err) {
+      console.error('Error fetching week statuses:', err);
+    }
+  };
+
+  await fetchWeekStatuses();
+
+  // Optional: Return to current week after delay
+  setTimeout(() => {
+    const currentWeek = weekOptions.find(
+      (w) => new Date() >= w.start && new Date() <= w.end
+    );
+    if (currentWeek) {
+      setSelectedWeek(currentWeek.label);
+    }
+    setShowSuccess(false);
+  }, 3000);
+} catch (err) {
+  alert('Failed to submit timesheet');
+  console.error(err);
+}
+  };
 
 
   const totalWeekHours = Object.values(times).reduce(
