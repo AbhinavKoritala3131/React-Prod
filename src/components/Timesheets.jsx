@@ -1,8 +1,10 @@
+
+
 import React, { useEffect, useState } from 'react';
 import { TimePicker } from 'rsuite';
 import 'rsuite/dist/rsuite.min.css';
 import 'react-clock/dist/Clock.css';
-import '../styles/Timesheets.css';
+import styles from '../styles/Timesheets.module.css';
 import api from '../api/axios'; 
 
 
@@ -15,48 +17,33 @@ const Timesheets = () => {
   const [selectedProject, setSelectedProject] = useState('');
   const [submittedWeeks, setSubmittedWeeks] = useState([]);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [weekStatuses, setWeekStatuses] = useState({
+    
+  currentWeek: null,
+  previousWeek: null,
+});
+const [weekType, setWeekType] = useState('');
+
   
+const isWeekSubmitted = submittedWeeks.includes(selectedWeek);
+// Then disable inputs and buttons accordingly
 
   const today = new Date();
   const todayStr = today.toDateString();
-  const isFriday = today.getDay() === 5;
+  const saveTimesToSessionStorage = (times) => {
+  sessionStorage.setItem('unsavedTimesheet', JSON.stringify(times));
+};
+
+const loadTimesFromSessionStorage = () => {
+  const saved = sessionStorage.getItem('unsavedTimesheet');
+  return saved ? JSON.parse(saved) : {};
+};
+
+
+
 
   // 1. Generate past 2 weeks
-  useEffect(() => {
-    const weeks = [];
-    const current = new Date();
-
-    for (let i = 0; i < 2; i++) {
-      const start = new Date(current);
-      start.setDate(current.getDate() - current.getDay() - i * 7);
-      const end = new Date(start);
-      end.setDate(start.getDate() + 6);
-      const label = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
-      weeks.push({ label, start, end });
-    }
-
-    setWeekOptions(weeks.reverse());
-    const defaultWeek = weeks[1];
-    setSelectedWeek(defaultWeek.label);
-    setWeekDays(generateWeekDays(defaultWeek.start));
-  }, []);
-
-  // 2. Update week days on week change
-  useEffect(() => {
-    const selected = weekOptions.find((w) => w.label === selectedWeek);
-    if (selected) {
-      setWeekDays(generateWeekDays(selected.start));
-    }
-  }, [selectedWeek]);
-
-  // 3. Mock projects
-  useEffect(() => {
-    const mockProjects = ['Project Alpha', 'Project Beta', 'Project Gamma'];
-    setProjects(mockProjects);
-    setSelectedProject(mockProjects[0]);
-  }, []);
-
-  const generateWeekDays = (start) => {
+    const generateWeekDays = (start) => {
     const days = [];
     for (let i = 0; i < 7; i++) {
       const d = new Date(start);
@@ -72,6 +59,99 @@ const Timesheets = () => {
     }
     return days;
   };
+  useEffect(() => {
+    const weeks = [];
+    const current = new Date();
+
+    for (let i = 0; i < 2; i++) {
+      const start = new Date(current);
+      start.setDate(current.getDate() - current.getDay() - i * 7);
+      const end = new Date(start);
+      end.setDate(start.getDate() + 6);
+      const label = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+      weeks.push({ label, start, end });
+    }
+
+    const reversedWeeks = weeks.reverse();
+setWeekOptions(reversedWeeks);
+
+const savedWeek = sessionStorage.getItem('selectedWeek');
+const defaultWeek = reversedWeeks.find(w => w.label === savedWeek) || reversedWeeks[1];
+
+setSelectedWeek(defaultWeek.label);
+setWeekDays(generateWeekDays(defaultWeek.start));
+
+  }, []);
+  const userId = Number(sessionStorage.getItem('userId'));
+  const fetchWeekStatuses = async (weeks, userId) => {
+  console.log('fetchWeekStatuses called with:', weeks, userId);
+  try {
+    const res = await api.post('/tsManage/status-check', {
+      empId: userId,
+      weeks,
+    });
+    console.log('API response:', res.data);
+
+    const { previous: prevStatus, current: currStatus } = res.data;
+
+    setWeekStatuses({
+      previousWeek: prevStatus || null,
+      currentWeek: currStatus || null,
+    });
+
+    const submitted = [];
+    if (prevStatus === 'SUBMITTED') submitted.push(weeks[0]);
+    if (currStatus === 'SUBMITTED') submitted.push(weeks[1]);
+
+    console.log('Setting submitted weeks:', submitted);
+    setSubmittedWeeks(submitted);
+  } catch (err) {
+    console.error('Error fetching week statuses:', err);
+  }
+};
+
+
+ useEffect(() => {
+  
+
+    if (weekOptions.length === 2 && userId) {
+    const previous = weekOptions[0].label;
+    const current = weekOptions[1].label;
+    fetchWeekStatuses([previous, current], userId);
+  }
+
+}, [selectedWeek,  userId]); // ✅ Add selectedWeek and weekOptions.length
+useEffect(() => {
+  console.log('submittedWeeks:', submittedWeeks);
+  console.log('weekOptions:', weekOptions);
+  console.log('selectedWeek:', selectedWeek);
+}, [submittedWeeks, weekOptions, selectedWeek]);
+
+  useEffect(() => {
+  if (selectedWeek) {
+    sessionStorage.setItem('selectedWeek', selectedWeek);
+  }
+}, [selectedWeek]);
+
+
+
+
+  // 2. Update week days on week change
+  useEffect(() => {
+    const selected = weekOptions.find((w) => w.label === selectedWeek);
+    if (selected) {
+      setWeekDays(generateWeekDays(selected.start));
+    }
+  }, [selectedWeek, weekOptions]);
+
+  // 3. Mock projects
+  useEffect(() => {
+    const mockProjects = ['Project Alpha', 'Project Beta', 'Project Gamma'];
+    setProjects(mockProjects);
+    setSelectedProject(mockProjects[0]);
+  }, []);
+
+
   const canFillWeek = (selectedWeekLabel, dateStrToFill = null) => {
   const selectedWeekIndex = weekOptions.findIndex(w => w.label === selectedWeekLabel);
   if (selectedWeekIndex === -1) return false;
@@ -127,74 +207,36 @@ const timeStringToDate = (timeStr) => {
 // Convert Date object to "hh:mm AM/PM" string
 const dateToTimeString = (date) => {
   if (!date) return '';
-  return date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-};
-
-
-
-const handleClock = (dateStr) => {
-  if (!canFillWeek(selectedWeek, dateStr)) return;
-
-  const now = new Date().toTimeString().slice(0, 5);
-
-  setTimes((prev) => {
-    const entry = prev[dateStr] || {};
-    const updated = { ...entry };
-
-    if (!entry.start) {
-      updated.start = now;
-
-      // Save only start
-      const payload = {
-        userId,
-        date: new Date(dateStr).toISOString().slice(0, 10),
-        start: now,
-        week: selectedWeek,
-        project: selectedProject,
-      };
-
-      api.post('http://localhost:8081/tsManage/submit', payload)
-        .then(() => console.log("Clock-in saved"))
-        .catch(err => console.error("Error saving clock-in:", err));
-    } else if (!entry.end) {
-      updated.end = now;
-      updated.total = calculateDailyHours(entry.start, now);
-
-      // Save end + total
-      const payload = {
-         userId,
-        date: new Date(dateStr).toISOString().slice(0, 10),
-        start: entry.start,
-        end: now,
-        total: updated.total,
-        week: selectedWeek,
-        project: selectedProject,
-      };
-
-      api.post('http://localhost:8081/tsManage/submit', payload)
-        .then(() => console.log("Clock-out saved"))
-        .catch(err => console.error("Error saving clock-out:", err));
-    }
-
-    return { ...prev, [dateStr]: updated };
-  });
+return date.toTimeString().slice(0, 8); // e.g., "08:30:00"
 };
 
 
 
 
+  const calculateDailyHours = (startStr, endStr) => {
+  if (!startStr || !endStr) return 0;
+
+  const startDate = timeStringToDate(startStr);
+  const endDate = timeStringToDate(endStr);
+  if (!startDate || !endDate) return 0;
+
+  const diffInMs = endDate - startDate;
+  if (diffInMs < 0) return 0; // Prevent negative duration
+
+  const diffInHours = diffInMs / (1000 * 60 * 60);
+  
+  return diffInHours.toFixed(2);
+};
+const formatDecimalHoursToHHmm = (decimalHours) => {
+  if (!decimalHours || isNaN(decimalHours)) return '0:00';
+  const totalMinutes = Math.round(parseFloat(decimalHours) * 60);
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  const minutesStr = minutes < 10 ? `0${minutes}` : `${minutes}`;
+  return `${hours}:${minutesStr}`;
+};
 
 
-  const calculateDailyHours = (start, end) => {
-    if (!start || !end) return 0;
-    const [sh, sm] = start.split(':').map(Number);
-    const [eh, em] = end.split(':').map(Number);
-    const startMin = sh * 60 + sm;
-    const endMin = eh * 60 + em;
-    const diff = endMin - startMin;
-    return (diff / 60).toFixed(2);
-  };
-const userId = Number(localStorage.getItem('userId'));
 
 const handleManualChange = (dateStr, field, value) => {
   if (!canFillWeek(selectedWeek, dateStr)) return;
@@ -202,28 +244,45 @@ const handleManualChange = (dateStr, field, value) => {
   setTimes((prev) => {
     const existing = prev[dateStr] || {};
     const updated = { ...existing, [field]: value };
+   
 
     if (updated.start && updated.end) {
-      updated.total = calculateDailyHours(updated.start, updated.end);
+  const startDate = timeStringToDate(updated.start);
+  const endDate = timeStringToDate(updated.end);
 
-      const payload = {
-        userId,
-        date: new Date(dateStr).toISOString().slice(0, 10),
-        start: updated.start,
-        end: updated.end,
-        total: updated.total,
-        week: selectedWeek,
-        project: selectedProject,
-      };
+  if (startDate >= endDate) {
+    updated.error = 'Invalid time given';
+    updated.total = '0.00';
+  } else {
+    updated.total = calculateDailyHours(updated.start, updated.end);
+    delete updated.error;
+  }
+}
 
-      api.post('http://localhost:8081/tsManage/submit', payload)
-        .then(() => console.log('Manual time saved'))
-        .catch((err) => console.error('Error saving entry:', err));
+  else {
+      // Clear error if only one of start/end is present (user fixing partial input)
+      if (updated.error) {
+        delete updated.error;
+      }
     }
-
-    return { ...prev, [dateStr]: updated };
+    const updatedTimes = { ...prev, [dateStr]: updated };
+    saveTimesToSessionStorage(updatedTimes);
+    return updatedTimes;
   });
 };
+
+useEffect(() => {
+  const restored = loadTimesFromSessionStorage();
+
+  if (
+    restored &&
+    Object.keys(restored).length > 0 &&
+    selectedWeek &&
+    !submittedWeeks.includes(selectedWeek)
+  ) {
+    setTimes(restored);
+  }
+}, [submittedWeeks, selectedWeek]);
 
 
 
@@ -232,45 +291,129 @@ const handleManualChange = (dateStr, field, value) => {
 
   const handleSendForApproval = async () => {
   const selected = weekOptions.find(w => w.label === selectedWeek);
-  const weekDaysToSend = generateWeekDays(selected.start);
+  const weekDaysToSend = generateWeekDays(selected.start).filter(day => {
+    const dayNum = new Date(day.fullDate).getDay();
+    
+    return dayNum >= 1 && dayNum <= 5; // Monday to Friday
+    
+  });
+  console.log('times for submission:', times);
+
+  // Validate all entries before submission
+  let hasErrors = false;
+const updatedTimes = { ...times };
+
+for (let day of weekDaysToSend) {
+  const entry = times[day.fullDate] || {};
+
+  // Validate required fields
+  if (!entry.start || !entry.end) {
+    updatedTimes[day.fullDate] = { 
+      ...entry, 
+      error: 'Please complete start and end times' 
+    };
+    hasErrors = true;
+  } else {
+    const startDate = timeStringToDate(entry.start);
+    const endDate = timeStringToDate(entry.end);
+    if (startDate >= endDate) {
+      updatedTimes[day.fullDate] = {
+        ...entry,
+        error: 'Invalid time given'
+      };
+      hasErrors = true;
+    } else {
+      // Clear error if valid
+      if (entry.error) {
+        const { error, ...rest } = entry;
+        updatedTimes[day.fullDate] = rest;
+      }
+    }
+  }
+}
+
+if (hasErrors) {
+  setTimes(updatedTimes);
+  return;
+}
+
 
   const dataToSend = weekDaysToSend.map(day => ({
-    userId, 
-    date: day.fullDate,
+    userId,
+    date:  new Date(day.fullDate).toISOString().slice(0, 10), // "YYYY-MM-DD"
+
     ...times[day.fullDate],
     project: selectedProject,
     week: selectedWeek,
   }));
+  console.log('dataToSend:', dataToSend);  // <-- Add this too
+
 
   try {
-    await api.post('tsManage/submit', {
-      week: selectedWeek,
-      entries: dataToSend,
-    });
+  await api.post('tsManage/submit', {
+    userId,
+    week: selectedWeek,
+    weekTotal: totalWeekHours.toFixed(2),
+    weekType: weekType,
+    entries: dataToSend,
+  });
 
-    setShowSuccess(true);
-    setSubmittedWeeks(prev => [...prev, selectedWeek]);
+  sessionStorage.removeItem('unsavedTimesheet');
+  setShowSuccess(true);
+  setTimes({});
 
-    setTimeout(() => {
-      setShowSuccess(false);
-      const currentWeek = weekOptions.find((w) =>
-        new Date() >= w.start && new Date() <= w.end
-      );
-      if (currentWeek) {
-        setSelectedWeek(currentWeek.label);
-      }
-    }, 3000);
-  } catch (err) {
-    alert('Failed to submit timesheet');
-    console.error(err);
-  }
-};
+  // ✅ Re-fetch week statuses from backend
+  const fetchWeekStatuses = async () => {
+    if (weekOptions.length === 0) return;
+
+    const previous = weekOptions[0]?.label;
+    const current = weekOptions[1]?.label;
+
+    try {
+      const res = await api.post('/tsManage/status-check', {
+        empId: userId,
+        weeks: [previous, current]
+      });
+
+      const { previous: prevStatus, current: currStatus } = res.data;
+      setWeekStatuses({
+        previousWeek: prevStatus || null,
+        currentWeek: currStatus || null
+      });
+
+      const submitted = [];
+      if (prevStatus === 'SUBMITTED') submitted.push(previous);
+      if (currStatus === 'SUBMITTED') submitted.push(current);
+      setSubmittedWeeks(submitted);
+
+    } catch (err) {
+      console.error('Error fetching week statuses:', err);
+    }
+  };
+
+  await fetchWeekStatuses();
+
+  // Optional: Return to current week after delay
+  setTimeout(() => {
+    const currentWeek = weekOptions.find(
+      (w) => new Date() >= w.start && new Date() <= w.end
+    );
+    if (currentWeek) {
+      setSelectedWeek(currentWeek.label);
+    }
+    setShowSuccess(false);
+  }, 3000);
+} catch (err) {
+  alert('Failed to submit timesheet');
+  console.error(err);
+}
+  };
 
 
   const totalWeekHours = Object.values(times).reduce(
-    (sum, entry) => sum + (parseFloat(entry.total) || 0),
-    0
-  );
+    (sum, entry) => {const totalNum = parseFloat(entry.total);
+  return sum + (isNaN(totalNum) ? 0 : totalNum);
+}, 0);
   const isSendEnabled = () => {
   const selected = weekOptions.find((w) => w.label === selectedWeek);
   if (!selected) return false;
@@ -294,34 +437,46 @@ const allWeeksSubmitted = weekOptions.every(week =>
   submittedWeeks.includes(week.label)
 );
 
-
+const hasUnsavedData = Object.keys(times || {}).length > 0;
+const isSubmitted = submittedWeeks.includes(selectedWeek);
   return (
-    <div className="timesheet-container">
+    <div className={styles.timesheetContainer}>
       <h2>🕒 Weekly Timesheet</h2>
+      
+{hasUnsavedData && !isSubmitted && (
+  <div className={styles.reminderBanner}>
+    ⚠️ Don't forget to submit your timesheet before logging out!
+  </div>
+)}
 
-      <div className="week-selector">
+
+      <div className={styles.weekSelector}>
         <label>Select Week:</label>
         <select  style={{ color: 'black' }}
 
           value={selectedWeek}
           onChange={(e) => setSelectedWeek(e.target.value)}
         >
-          {weekOptions.map((week) => {
+         {weekOptions.map((week) => {
   const isSubmitted = submittedWeeks.includes(week.label);
+
   return (
     <option
       key={week.label}
       value={week.label}
       disabled={isSubmitted}
-      title={isSubmitted ? 'Already submitted, contact your admin to edit' : ''}
+      title={isSubmitted ? 'Already submitted' : ''}
     >
       {week.label} {isSubmitted && '✅ Submitted'}
     </option>
   );
 })}
 
+
+
+
         </select>
-        <span className="month-display">
+        <span className={styles.monthDisplay}>
           {new Date().toLocaleString('default', { month: 'long', year: 'numeric' })}
         </span>
       </div>
@@ -337,7 +492,7 @@ const allWeeksSubmitted = weekOptions.every(week =>
   </div>
 ) : (
   <>
-    <div className="project-dropdown">
+    <div className={styles.projectDropdown}>
       <label>Select Project:</label>
       <select style={{ color: 'white' }}
         value={selectedProject}
@@ -351,14 +506,14 @@ const allWeeksSubmitted = weekOptions.every(week =>
       </select>
     </div>
 
-    <div className="timesheet-table">
+    <div className={styles.timesheetTable}>
       <table>
         <thead>
           <tr>
             <th>Date</th>
             <th>Start</th>
             <th>End</th>
-            <th>Clock</th>
+            {/* <th>Clock</th> */}
             <th>Total</th>
           </tr>
         </thead>
@@ -370,6 +525,8 @@ const allWeeksSubmitted = weekOptions.every(week =>
     const isToday = day.fullDate === todayStr;
     const dateObj = new Date(day.fullDate);
     const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
+    const isFutureDay = dateObj > today;
+
 
 
             return (
@@ -383,21 +540,29 @@ const allWeeksSubmitted = weekOptions.every(week =>
               >
                 <td>{day.label}</td>
                 <td>
-  <TimePicker className="rs-picker-toggle"
+  <TimePicker     className={entry.error ? styles.invalidTime : ''}
+
+
     format="hh:mm a"
     value={timeStringToDate(entry.start)}
+
     onChange={(value) => {
       if (!value) return;
       const timeString = dateToTimeString(value);
       handleManualChange(day.fullDate, 'start', timeString);
     }}
-    hour12
+    showMeridiem={true} 
+
     placeholder="Start time"
-    disabled={isWeekend}
+    disabled={isWeekend|| isFutureDay|| isWeekSubmitted}
   />
+  {entry.error && (
+  <div className={styles.errorText}>{entry.error}</div>
+)}
 </td>
 <td>
-  <TimePicker className="rs-picker-toggle"
+  <TimePicker     className={entry.error ? styles.invalidTime : ''}
+
     format="hh:mm a"
     value={timeStringToDate(entry.end)}
     onChange={(value) => {
@@ -405,39 +570,43 @@ const allWeeksSubmitted = weekOptions.every(week =>
       const timeString = dateToTimeString(value);
       handleManualChange(day.fullDate, 'end', timeString);
     }}
-    hour12
+    showMeridiem={true} 
     placeholder="End time"
-    disabled={isWeekend}
+    disabled={isWeekend || isFutureDay|| isWeekSubmitted}
+    
   />
+  {entry.error && (
+  <div className={styles.errorText}>{entry.error}</div>
+)}
 </td>
 
-                <td>
+                {/* <td>
   {isToday &&  (
     <button 
       disabled={isWeekend}
-      className={`clock-btn ${!entry.start ? 'clock-in' : !entry.end ? 'clock-out' : 'done'}`}
+      className={`${styles.clockBtn} ${!entry.start ? styles.clockIn : !entry.end ? styles.clockOut : styles.done}`}
       onClick={() => handleClock(day.fullDate)}
-      title={isWeekend ? "Cannot clockout on weekends" : ""}
+      title={isWeekend ? "Cannot clockIn/out on weekends" : ""}
       
     >
       {!entry.start ? 'Clock In' : !entry.end ? 'Clock Out' : 'Done'}
     </button>
   )}
-</td>
+</td> */}
 
-                <td>{entry.total || '0.00'} hrs</td>
+                <td>{formatDecimalHoursToHHmm(entry.total) || '0:00'} hrs</td>
               </tr>
             );
           })}
         </tbody>
       </table>
     </div>
-     {!submittedWeeks.includes(selectedWeek) && !allWeeksSubmitted && (
+     {!isWeekSubmitted &&  !allWeeksSubmitted && (
   <div style={{ textAlign: 'center', marginTop: '30px' }}>
     <button
-      className="submit-btn rocket-btn"
+      className={`${styles.submitBtn} ${styles.rocketBtn}`}
       onClick={handleSendForApproval}
-      disabled={!isSendEnabled()}
+      disabled={!isSendEnabled()|| isWeekSubmitted}
       title={
         isSendEnabled()
           ? 'Submit this timesheet for approval'
@@ -449,8 +618,8 @@ const allWeeksSubmitted = weekOptions.every(week =>
   </div>
 )}
 
-    <div className="total-time">
-      Total Time This Week: <strong>{totalWeekHours.toFixed(2)} hrs</strong>
+    <div className={styles.totalTime}>
+  Total Time This Week: <strong>{formatDecimalHoursToHHmm(totalWeekHours)} hrs</strong>
     </div>
   </>
 )}
@@ -459,7 +628,7 @@ const allWeeksSubmitted = weekOptions.every(week =>
       
 
       {showSuccess && (
-        <div className="success-toast">
+        <div className={styles.successToast}>
           ✅ Timesheet submitted successfully!
         </div>
       )}

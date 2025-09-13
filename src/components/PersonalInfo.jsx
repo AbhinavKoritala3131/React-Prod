@@ -1,6 +1,6 @@
 // src/components/PersonalInfo.jsx
 import React from 'react';
-import '../styles/PersonalInfo.css';
+import '../styles/PersonalInfo.module.css';
 
 const PersonalInfo = ({ user }) => {
   return (

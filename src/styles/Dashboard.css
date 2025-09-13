@@ -2,7 +2,8 @@
 
 .dashboard-container {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f4f6f8;
+  /* background: #f4f6f8; */
+  background-color: black;
   min-height: 100vh;
   margin: 0;
   padding: 0;
@@ -50,13 +51,13 @@
 }
 
 /* Company name */
-.company-name {
+.comp-name {
   font-size: 1.4rem;
   font-weight: 600;
   margin: 0;
   position: relative;
   margin-left: -6px;
-  top: -6px; /* Negative = move upward */
+  top: 5px; 
   text-transform: capitalize;
   cursor: pointer;
 }
@@ -164,83 +165,61 @@
   background-color: #c1d4ff;
 }
 
-/* Floating welcome card */
-.floating-welcome {
-  background: white;
-  padding: 30px 25px;
-  border-radius: 12px;
-  max-width: 420px;
-  margin: 80px auto;
-  box-shadow: 0 6px 14px rgba(0,0,0,0.1);
-  text-align: center;
-  animation: fadeIn 1s ease-in-out;
-}
-
-.floating-welcome h2 {
-  margin-bottom: 12px;
-  font-weight: 700;
-  font-size: 1.6rem;
-}
-
-.floating-welcome p {
-  font-size: 1.1rem;
-  margin-bottom: 18px;
-  color: #333;
-}
-
-.primary-btn {
-  margin-top: 15px;
-  padding: 12px 26px;
-  background-color: #0052cc;
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1rem;
-  cursor: pointer;
+.oval-clock-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 14px 28px;
+  font-size: 16px;
   font-weight: 600;
-  transition: background-color 0.3s ease;
-  text-decoration: none;
-  display: inline-block;
+  color: #ffffff;
+  border: none;
+  border-radius: 32px;
+  cursor: pointer;
+  z-index: 999;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 18px rgba(0, 255, 191, 0.5);
+  background: linear-gradient(135deg, #00b4d8, #00ffbf);
+  animation: pulseGlow 2s infinite ease-in-out;
 }
 
-.primary-btn:hover {
-  background-color: #003f9e;
+.oval-clock-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 24px rgba(0, 255, 191, 0.8);
 }
 
-/* Fade-in animation */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
+.oval-clock-btn.clocked-in {
+  background: linear-gradient(135deg, #06d6a0, #118ab2);
+}
+
+.oval-clock-btn.clocked-out {
+  background: linear-gradient(135deg, #ff6b6b, #f06595);
+  box-shadow: 0 0 18px rgba(255, 107, 107, 0.5);
+  animation: pulseRed 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+  0% {
+    box-shadow: 0 0 12px rgba(0, 255, 191, 0.3);
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 191, 0.7);
+  }
+  100% {
+    box-shadow: 0 0 12px rgba(0, 255, 191, 0.3);
   }
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-  .sidebar {
-    width: 200px;
-    padding: 15px 12px;
+@keyframes pulseRed {
+  0% {
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.3);
   }
-
-  .dashboard-header {
-    padding: 14px 18px;
+  50% {
+    box-shadow: 0 0 20px rgba(255, 107, 107, 0.7);
   }
-
-  .company-name {
-    font-size: 1.2rem;
-  }
-
-  .primary-btn {
-    font-size: 1rem;
-    padding: 10px 20px;
-  }
-
-  .floating-welcome {
-    margin: 70px 20px;
-    padding: 25px 20px;
+  100% {
+    box-shadow: 0 0 12px rgba(255, 107, 107, 0.3);
   }
 }
+
+
