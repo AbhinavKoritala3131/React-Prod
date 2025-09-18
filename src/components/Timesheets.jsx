@@ -221,10 +221,16 @@ return date.toTimeString().slice(0, 8); // e.g., "08:30:00"
   if (!startDate || !endDate) return 0;
 
   const diffInMs = endDate - startDate;
-  if (diffInMs < 0) return 0; // Prevent negative duration
+  if (diffInMs < 0) {
+    diffInMs += 24 * 60 * 60 * 1000;
+  }
 
-  const diffInHours = diffInMs / (1000 * 60 * 60);
-  
+  // Round to nearest full minute (ignore seconds)
+  const totalMinutes = Math.round(diffInMs / (1000 * 60));
+
+  // Convert to decimal hours
+  const diffInHours = totalMinutes / 60;
+
   return diffInHours.toFixed(2);
 };
 const formatDecimalHoursToHHmm = (decimalHours) => {
