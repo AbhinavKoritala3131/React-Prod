@@ -43,12 +43,26 @@ const DailyTimesheetsTab = ({ selectedWeek }) => {
       [key]: { ...prev[key], empId, date, [field]: value },
     }));
   };
+const parseTime = (str) => {
+  if (!str) return null;
+  const [h, m, s] = str.split(':').map(Number);
+  return new Date(1970, 0, 1, h, m, s);
+};
 
-  const parseTime = (str) => {
-    if (!str) return null;
-    const [h, m, s] = str.split(':').map(Number);
-    return new Date(1970, 0, 1, h, m, s);
-  };
+const getMinutesDiff = (startStr, endStr) => {
+  const start = parseTime(startStr);
+  const end = parseTime(endStr);
+  if (!start || !end || end <= start) return 0;
+  return Math.floor((end - start) / (1000 * 60)); // minutes diff
+};
+
+const minutesToHourMinuteString = (minutes) => {
+  if (!minutes || isNaN(minutes)) return '0.00';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}.${m.toString().padStart(2, '0')}`;
+};
+
 
   const formatTime = (date) => {
     if (!date) return '';
@@ -73,6 +87,8 @@ const DailyTimesheetsTab = ({ selectedWeek }) => {
       const end = changes.end_time ?? entry.end_time;
       const project = changes.project ?? entry.project;
       const total = parseFloat(calculateHours(start, end));
+      const totalMinutes = getMinutesDiff(start, end);
+
 
       return {
         empId,
@@ -80,7 +96,7 @@ const DailyTimesheetsTab = ({ selectedWeek }) => {
         start,
         end_time: end,
         project,
-        total,
+  total: totalMinutes, // save as integer minutes
         week: entry.week || selectedWeek  // ensure week is included
 
       };
@@ -153,9 +169,22 @@ const DailyTimesheetsTab = ({ selectedWeek }) => {
                   }
                 />
               </td>
-              <td>
-                {calculateHours(entry.start, entry.end_time)} hrs
-              </td>
+             
+<td>
+  {(() => {
+    // Use edited values if present, else original
+    const key = buildKey(entry.empId, entry.date);
+    const editedEntry = edited[key];
+    const start = editedEntry?.start ?? entry.start;
+    const end = editedEntry?.end_time ?? entry.end_time;
+
+    const totalMinutes = getMinutesDiff(start, end);
+
+    return minutesToHourMinuteString(totalMinutes);
+  })()} hrs
+</td>
+
+            
             </tr>
           ))}
         </tbody>

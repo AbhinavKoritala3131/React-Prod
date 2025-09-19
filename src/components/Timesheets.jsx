@@ -295,78 +295,80 @@ useEffect(() => {
 
 
 
-  const handleSendForApproval = async () => {
+const handleSendForApproval = async () => {
   const selected = weekOptions.find(w => w.label === selectedWeek);
   const weekDaysToSend = generateWeekDays(selected.start).filter(day => {
     const dayNum = new Date(day.fullDate).getDay();
-    
     return dayNum >= 1 && dayNum <= 5; // Monday to Friday
-    
   });
-  console.log('times for submission:', times);
 
-  // Validate all entries before submission
+  // Validate all entries before submission (your existing validation logic here)
   let hasErrors = false;
-const updatedTimes = { ...times };
+  const updatedTimes = { ...times };
 
-for (let day of weekDaysToSend) {
-  const entry = times[day.fullDate] || {};
+  for (let day of weekDaysToSend) {
+    const entry = times[day.fullDate] || {};
 
-  // Validate required fields
-  if (!entry.start || !entry.end) {
-    updatedTimes[day.fullDate] = { 
-      ...entry, 
-      error: 'Please complete start and end times' 
-    };
-    hasErrors = true;
-  } else {
-    const startDate = timeStringToDate(entry.start);
-    const endDate = timeStringToDate(entry.end);
-    if (startDate >= endDate) {
-      updatedTimes[day.fullDate] = {
-        ...entry,
-        error: 'Invalid time given'
+    if (!entry.start || !entry.end) {
+      updatedTimes[day.fullDate] = { 
+        ...entry, 
+        error: 'Please complete start and end times' 
       };
       hasErrors = true;
     } else {
-      // Clear error if valid
-      if (entry.error) {
-        const { error, ...rest } = entry;
-        updatedTimes[day.fullDate] = rest;
+      const startDate = timeStringToDate(entry.start);
+      const endDate = timeStringToDate(entry.end);
+      if (startDate >= endDate) {
+        updatedTimes[day.fullDate] = {
+          ...entry,
+          error: 'Invalid time given'
+        };
+        hasErrors = true;
+      } else {
+        if (entry.error) {
+          const { error, ...rest } = entry;
+          updatedTimes[day.fullDate] = rest;
+        }
       }
     }
   }
-}
 
-if (hasErrors) {
-  setTimes(updatedTimes);
-  return;
-}
+  if (hasErrors) {
+    setTimes(updatedTimes);
+    return;
+  }
 
+  // Convert daily totals to minutes before sending
+  const dataToSend = weekDaysToSend.map(day => {
+    const entry = times[day.fullDate] || {};
+    const decimalHours = parseFloat(entry.total) || 0;
+    const totalMinutes = Math.round(decimalHours * 60);
 
-  const dataToSend = weekDaysToSend.map(day => ({
-    userId,
-    date:  new Date(day.fullDate).toISOString().slice(0, 10), // "YYYY-MM-DD"
-
-    ...times[day.fullDate],
-    project: selectedProject,
-    week: selectedWeek,
-  }));
-  console.log('dataToSend:', dataToSend);  // <-- Add this too
-
-
-  try {
-  await api.post('tsManage/submit', {
-    userId,
-    week: selectedWeek,
-    weekTotal: totalWeekHours.toFixed(2),
-    weekType: weekType,
-    entries: dataToSend,
+    return {
+      userId,
+      date: new Date(day.fullDate).toISOString().slice(0, 10),
+      ...entry,
+      total: totalMinutes,  // <-- converted to minutes
+      project: selectedProject,
+      week: selectedWeek,
+    };
   });
 
-  sessionStorage.removeItem('unsavedTimesheet');
-  setShowSuccess(true);
-  setTimes({});
+  // Convert total week hours to minutes
+  const totalWeekMinutes = Math.round(totalWeekHours * 60);
+
+  try {
+    await api.post('tsManage/submit', {
+      userId,
+      week: selectedWeek,
+      weekTotal: totalWeekMinutes, // <-- converted to minutes
+      weekType: weekType,
+      entries: dataToSend,
+    });
+
+    sessionStorage.removeItem('unsavedTimesheet');
+    setShowSuccess(true);
+    setTimes({});
 
   // ✅ Re-fetch week statuses from backend
   const fetchWeekStatuses = async () => {

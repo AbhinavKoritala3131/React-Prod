@@ -28,6 +28,13 @@ const WeeklyStatusTab = ({ selectedWeek }) => {
 
     fetchStatuses();
   }, [selectedWeek]);
+  const formatTotalFromMinutes = (totalMinutes) => {
+  if (typeof totalMinutes !== 'number' || totalMinutes <= 0) return '0.00';
+  const h = Math.floor(totalMinutes / 60);
+  const m = totalMinutes % 60;
+  return `${h}.${m.toString().padStart(2, '0')}`;
+};
+
 
   const handleAction = async (statusId, newStatus) => {
   const statusEntry = statusEntries.find(e => e.id === statusId);
@@ -85,7 +92,7 @@ const WeeklyStatusTab = ({ selectedWeek }) => {
             ) : statusEntries.map(entry => (
               <tr key={entry.id}>
                 <td>{entry.empId}</td>
-                <td>{entry.total} hrs</td>
+<td>{formatTotalFromMinutes(entry.total)} hrs</td>
                 <td>
                   <span className={
                 entry.status === 'APPROVED' ? styles['status-approved'] :
