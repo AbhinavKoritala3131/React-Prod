@@ -11,8 +11,13 @@
 }
 
 .dashboard-header {
-  background-color: #0052cc;
-  color: white;
+  /* background-color: #0052cc; */
+    background-color: #1a237e; /* El Clásico deep indigo */
+  color: #ffffff;
+
+  /* color: white; */
+    border-bottom: 3px solid #64b5f6;
+
   display: flex;
   justify-content: space-between;
   align-items: center;

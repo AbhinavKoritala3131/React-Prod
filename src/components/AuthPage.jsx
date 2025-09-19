@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 // import { useNavigate } from 'react-router-dom'; 
 import styles from'../styles/AuthPage.module.css';
 import logo from '../assets/v.png';
-import { useNavigate, Link } from 'react-router-dom';  // Add Link here
+import { useNavigate, Link } from 'react-router-dom';  
+import api from '../api/axios';
+
+
 
 
 const AuthPage = () => {
@@ -164,15 +167,13 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     };
 
     try {
-      const response = await fetch('http://localhost:8081/users/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      const response = await api.post('http://localhost:8081/users/register', payload)
+     
 
-      const data = await response.json();
+      const data = response.data;
 
-      if (response.ok) {
+     if (response.status === 200) {
+
         setRegisterResponse({ success: true, message: data.message || 'User registered successfully!' });
         setFormData({
           firstName: '',
@@ -217,17 +218,15 @@ const validateEmail = (email) => {
   }
 
     try {
-      const response = await fetch('http://localhost:8081/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(signinData),
-      });
+      const response = await api.post('http://localhost:8081/users/login',signinData);
+        if (response.status === 200) {
+      const data = await response.data;
 
-      const data = await response.json();
-
-      if (response.ok) {
+      
         sessionStorage.setItem('userId', data.userId);
         sessionStorage.setItem('role',data.role)
+      sessionStorage.setItem('jwtToken', data.token);
+
         setSigninResponse({ success: true, message: data.message || 'Login successful!' });
         setSigninData({ email: '', password: '' });
         setSigninSubmitted(false);
