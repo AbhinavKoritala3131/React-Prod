@@ -6,7 +6,7 @@ import logo from '../assets/v.png';
 import api from '../api/axios'
 import ManageTimesheets from './adminOnly/ManageTimesheets'
 
-import PersonalInfo from './personalInfo';
+import PersonalInfo from './PersonalInfo';
 import Projects from './Projects';
 import Timesheets from './Timesheets';
 

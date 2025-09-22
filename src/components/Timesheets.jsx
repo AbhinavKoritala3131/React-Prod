@@ -220,7 +220,7 @@ return date.toTimeString().slice(0, 8); // e.g., "08:30:00"
   const endDate = timeStringToDate(endStr);
   if (!startDate || !endDate) return 0;
 
-  const diffInMs = endDate - startDate;
+  let diffInMs = endDate - startDate;
   if (diffInMs < 0) {
     diffInMs += 24 * 60 * 60 * 1000;
   }
