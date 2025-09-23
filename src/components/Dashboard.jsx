@@ -3,11 +3,12 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Dashboard.css';
 import logo from '../assets/v.png';
+import api from '../api/axios'
 import ManageTimesheets from './adminOnly/ManageTimesheets'
 import GlowingCards from './DashboardElements';
 
 
-import PersonalInfo from './personalInfo';
+import PersonalInfo from './PersonalInfo';
 import Projects from './Projects';
 import Timesheets from './Timesheets';
 
@@ -62,30 +63,36 @@ const role = sessionStorage.getItem('role'); // e.g., 'USER' or 'ADMIN'
 
     // Fetch user data
     const fetchUserDetails = async () => {
-      try {
-        const response = await fetch(`http://localhost:8081/users/fetch/${userId}`);
-        const data = await response.json();
-        if (response.ok) {
-          setUser(data);
-          setActiveComponent('home');
-        
-        const statusRes = await fetch(`http://localhost:8081/tsManage/status/${userId}`);
-        if (statusRes.ok) {
-          const currentStatus = await statusRes.text(); // Because we return a plain string
-          const clockedIn = currentStatus === 'CLOCK_IN';
-          setIsClockedIn(clockedIn);
-          sessionStorage.setItem('isClockedIn', clockedIn);
-        }
-      }
-         else {
-          console.error('Failed to fetch user details');
-        }
-      } catch (error) {
-        console.error('Error fetching user data:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  try {
+    const response = await fetch(`http://localhost:8081/users/fetch/${userId}`);
+
+    if (!response.ok) {
+      console.error('Failed to fetch user details:', response.status);
+      setLoading(false);
+      return;
+    }
+
+    // Now safe to parse JSON
+    const data = await response.json();
+    setUser(data);
+    setActiveComponent('home');
+
+    // Fetch clock status
+    const statusRes = await fetch(`http://localhost:8081/tsManage/status/${userId}`);
+    if (statusRes.ok) {
+      const currentStatus = await statusRes.text(); // plain string
+      const clockedIn = currentStatus === 'CLOCK_IN';
+      setIsClockedIn(clockedIn);
+      sessionStorage.setItem('isClockedIn', clockedIn);
+    }
+
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
     fetchUserDetails();
 
@@ -146,19 +153,21 @@ const role = sessionStorage.getItem('role'); // e.g., 'USER' or 'ADMIN'
       
     };
 
-    fetch('http://localhost:8081/tsManage/clock', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    }).then(res => {
-      if (res.ok) {
-        const newState = !isClockedIn;
-        setIsClockedIn(newState);
-        sessionStorage.setItem('isClockedIn', newState);
-      } else {
-        alert('Failed to update clock status.');
-      }
-    });
+  
+api.post('http://localhost:8081/tsManage/clock', payload)
+  .then(res => {
+    if (res.status === 200) {
+      const newState = !isClockedIn;
+      setIsClockedIn(newState);
+      sessionStorage.setItem('isClockedIn', newState);
+    } else {
+      alert('Failed to update clock status.');
+    }
+  })
+  .catch(err => {
+    console.error('Clock update failed:', err);
+    alert('Failed to update clock status.');
+  });
   };
 
   if (loading) return <div className="dashboard-loading">Loading dashboard...</div>;

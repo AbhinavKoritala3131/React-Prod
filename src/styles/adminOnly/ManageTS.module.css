@@ -1,0 +1,203 @@
+/* TimesheetTabs.module.css */
+
+/* Main container on black background */
+.container {
+  background-color: #000; /* true black */
+  color: #f1f1f1; /* light gray text for contrast */
+  padding: 20px;
+  border-radius: 8px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Headings */
+.heading {
+  color: #42a5f5; /* bright blue */
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+.heading em {
+  color: #81d4fa; /* lighter blue for dates */
+  font-style: normal;
+}
+
+/* Table styles */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+  background-color: #121212; /* very dark gray */
+  border: 1px solid #333;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.table thead tr {
+  background-color: #1e88e5; /* bright blue header */
+  color: #ffffff;
+  font-weight: bold;
+  text-align: left;
+}
+
+.table thead th {
+  padding: 12px 15px;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid #333;
+}
+
+.table tbody tr:hover {
+  background-color: #222;
+}
+
+.table tbody td {
+  padding: 12px 15px;
+  vertical-align: middle;
+  color: #f1f1f1;
+}
+
+/* Status colors */
+.status-approved {
+  color: #66bb6a;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: #ef5350;
+  font-weight: bold;
+}
+
+.status-submitted {
+  color: #ffee58;
+  font-weight: bold;
+}
+
+/* Input text fields */
+.inputText {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border: 1px solid #666;
+  background-color: #1c1c1c;
+  color: #f1f1f1;
+  font-size: 0.9rem;
+  box-sizing: border-box;
+}
+
+.inputText::placeholder {
+  color: #888;
+}
+
+.inputText:focus {
+  outline: none;
+  border-color: #42a5f5;
+  background-color: #121212;
+  color: #fff;
+}
+
+/* Common buttons */
+.btn {
+  padding: 6px 12px;
+  font-weight: bold;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Approve button */
+.btn-approve {
+  background-color: #43a047;
+  color: #fff;
+  margin-right: 8px;
+}
+
+.btn-approve:hover {
+  background-color: #2e7d32;
+}
+
+/* Reject button */
+.btn-reject {
+  background-color: #e53935;
+  color: #fff;
+}
+
+.btn-reject:hover {
+  background-color: #c62828;
+}
+
+/* Save button (Daily tab) */
+.saveBtn {
+  padding: 10px 25px;
+  background-color: #1e88e5;
+  color: #fff;
+  font-weight: bold;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  margin-top: 25px;
+  transition: background-color 0.3s ease;
+}
+
+.saveBtn:disabled {
+  background-color: #444;
+  cursor: not-allowed;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background-color: #1565c0;
+}
+
+/* styles/adminOnly/ManageTS.module.css */
+
+.timesheetManagementContainer {
+  background-color: #000;
+  color: #f1f1f1;
+  padding: 30px;
+  border-radius: 8px;
+  min-height: 100vh;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Headings */
+h2 {
+  color: #42a5f5;
+  margin-bottom: 30px;
+  font-weight: 600;
+}
+
+/* Tabs */
+.tabButton {
+  padding: 10px 15px;
+  margin-right: 10px;
+  background-color: #444;
+  color: #eee;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.tabButton:hover {
+  background-color: #555;
+}
+
+.active {
+  background-color: #1e88e5;
+  color: #fff;
+}
+
+/* Week selector */
+.weekSelector {
+  padding: 8px;
+  background-color: #1c1c1c;
+  color: #f1f1f1;
+  border: 1px solid #555;
+  border-radius: 4px;
+}
+
+.weekSelector:focus {
+  outline: none;
+  border-color: #42a5f5;
+}
