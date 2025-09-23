@@ -4,6 +4,8 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Dashboard.css';
 import logo from '../assets/v.png';
 import ManageTimesheets from './adminOnly/ManageTimesheets'
+import GlowingCards from './DashboardElements';
+
 
 import PersonalInfo from './personalInfo';
 import Projects from './Projects';
@@ -259,6 +261,30 @@ const role = sessionStorage.getItem('role'); // e.g., 'USER' or 'ADMIN'
 </button>
 }
 {activeComponent === 'ManageTimesheets' && role === 'ADMIN' && <ManageTimesheets />}
+{activeComponent === 'home' && (
+  <div
+    className="home-dashboard"
+    style={{
+      display: 'flex',
+      flexDirection: 'column',    // to stack the button and cards vertically
+      justifyContent: 'center',   // vertical centering
+      alignItems: 'center',       // horizontal centering
+      height: '80vh',
+      gap: '20px'                 // space between button and cards
+    }}
+  >
+    <button
+      className={`oval-clock-btn ${isClockedIn ? 'clocked-in' : 'clocked-out'}`}
+      onClick={handleClock}
+    >
+      {isClockedIn ? 'Clock Out' : 'Clock In'}
+    </button>
+
+    <GlowingCards />
+  </div>
+)}
+
+
 
 
 
