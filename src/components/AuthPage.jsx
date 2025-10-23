@@ -23,7 +23,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
-    email: '',
+    username: '',
     password: '',
     country: '',
     mobile: '',
@@ -36,7 +36,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
 
   // Sign In form state
   const [signinData, setSigninData] = useState({
-    email: '',
+    username: '',
     password: ''
   });
   const [signinResponse, setSigninResponse] = useState(null);
@@ -63,7 +63,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     setFormData({
       firstName: '',
       lastName: '',
-      email: '',
+      username: '',
       password: '',
       country: '',
       mobile: '',
@@ -74,7 +74,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
 
   if (formName === 'signin') {
     setSigninData({
-      email: '',
+      username: '',
       password: ''
     });
   }
@@ -101,10 +101,10 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     if (!formData.lastName.trim() || formData.lastName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.lastName.trim())) {
       errors.lastName = 'Last name must be at least 2 letters and contain only letters';
     }
-    if (!formData.email.trim()) {
-      errors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      errors.email = 'Invalid email format';
+    if (!formData.username.trim()) {
+      errors.username = 'Email is required';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.username)) {
+      errors.username = 'Invalid email format';
     }
     if (!formData.password) {
       errors.password = 'Password is required';
@@ -158,7 +158,7 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     const payload = {
       fname: formData.firstName,
       lname: formData.lastName,
-      email: formData.email,
+      username: formData.username,
       password: formData.password,
       country: formData.country,
       mobile: fullMobile,
@@ -172,13 +172,13 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
 
       const data = response.data;
 
-     if (response.status === 200) {
+     
 
-        setRegisterResponse({ success: true, message: data.message || 'User registered successfully!' });
+        setRegisterResponse({ success: true, message: data || 'User registered successfully!' });
         setFormData({
           firstName: '',
           lastName: '',
-          email: '',
+          username: '',
           password: '',
           country: '',
           mobile: '',
@@ -186,12 +186,26 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
           dob: ''
         });
         setFormErrors({});
-      } else {
-        setRegisterResponse({ success: false, message: data.message || 'Failed to register user.' });
-      }
-    } catch {
-      setRegisterResponse({ success: false, message: 'Something went wrong. Please try again.' });
+      
+      
+      
+    } catch (error) {
+  // Axios error has response inside error.response
+  if (error.response) {
+    const { status, data } = error.response;
+
+    if (status === 401) {
+      setRegisterResponse({ success: false, message: data || 'You are not authorized to register, please contact your admin.' });
+    } else if (status === 409) {
+      setRegisterResponse({ success: false, message: data || 'User already exists.' });
+    } else {
+      setRegisterResponse({ success: false, message: data?.message || 'Failed to register user.' });
     }
+  } else {
+    // No response from server (network error)
+    setRegisterResponse({ success: false, message: 'Something went wrong. Please try again.' });
+  }
+}
   };
 
   // Sign In Handlers
@@ -200,19 +214,19 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     setSigninData((prev) => ({ ...prev, [name]: value }));
     setSigninResponse(null);
   };
-const validateEmail = (email) => {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+const validateEmail = (username) => {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(username);
 };
   const handleSigninSubmit = async (e) => {
     e.preventDefault();
       setSigninSubmitted(true); // Mark sign-in submitted
 
 
-    if (!signinData.email || !signinData.password) {
+    if (!signinData.username || !signinData.password) {
       setSigninResponse({ success: false, message: 'Please enter email and password' });
       return;
     }
-     if (!validateEmail(signinData.email)) {
+     if (!validateEmail(signinData.username)) {
     setSigninResponse({ success: false, message: 'Invalid email format' });
     return;
   }
@@ -220,27 +234,39 @@ const validateEmail = (email) => {
     try {
       const response = await api.post('http://localhost:8081/users/login',signinData);
         if (response.status === 200) {
-      const data = await response.data;
+      const data = response.data;
 
       
-        sessionStorage.setItem('userId', data.userId);
-        sessionStorage.setItem('role',data.role)
-      sessionStorage.setItem('jwtToken', data.token);
 
-        setSigninResponse({ success: true, message: data.message || 'Login successful!' });
-        setSigninData({ email: '', password: '' });
+
+        setSigninResponse({ success: true, message: data.msg || 'Login successful!' });
+        setSigninData({ username: '', password: '' });
+        sessionStorage.setItem('jwtToken', data.jwtToken);
         setSigninSubmitted(false);
         setTimeout(() => {
           console.log('Login response:', data);
+          
 
           navigate('/Dashboard');
-        }, 1000);
+        }, 1500);
       } else {
-        setSigninResponse({ success: false, message: data.message || 'Invalid credentials' });
+        setSigninResponse({ success: false, message: data || 'Something went wrong !' });
       }
-    } catch {
-      setSigninResponse({ success: false, message: 'Network error. Please try again.' });
-    }
+    } catch(err) {
+      if (err.response) {
+    const { status, data } = err.response;
+
+    if (status === 401) {
+      setSigninResponse({ success: false, message: data || 'Invalid Credentials' });
+    } else if (status === 404) {
+      setSigninResponse({ success: false, message: data || 'Please register before login' });
+    } 
+  } else {
+    // No response from server (network error)
+    setSigninResponse({ success: false, message: 'Something went wrong. Please try again.' });
+  }
+      
+}
   };
 
   // ======== Helpers for UI ========
@@ -255,7 +281,7 @@ const validateEmail = (email) => {
   }
 
   if (activeForm === 'signin' && signinSubmitted) {
-    const isError = field === 'email' && !signinData.email ||
+    const isError = field === 'username' && !signinData.username ||
                     field === 'password' && !signinData.password;
     return {
       className: isError ? styles.inputError : '',
@@ -337,12 +363,12 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
               <input
                 id="signin-email"
                 type="email"
-                name="email"
+                name="username"
                 placeholder='youremail@gmail.com'
-                value={signinData.email}
+                value={signinData.username}
                 onChange={handleSigninChange}
                 required
-                {...getInputProps('email')}
+                {...getInputProps('username')}
               />
 
               <label htmlFor="signin-password">Password</label>
@@ -435,11 +461,11 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
               <input
                 id="register-email"
                 type="email"
-                name="email"
+                name="username"
                 placeholder='e.g. Noah.dawson@yahoo.com'
-                value={formData.email}
+                value={formData.username}
                 onChange={handleChange}
-                {...getInputProps('email')}
+                {...getInputProps('username')}
               />
 
               <label htmlFor="register-password">Password</label>

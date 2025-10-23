@@ -2,15 +2,16 @@
 import React, { useEffect, useRef } from 'react';
 import styles from '../styles/DashElements.module.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCalendarDays, faUser, faFile, faLink } from '@fortawesome/free-solid-svg-icons';
+import { faCalendarDays, faUser, faLink } from '@fortawesome/free-solid-svg-icons';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 const cards = [
   {
     icon: faCalendarDays,
     title: 'Timesheets',
-    description: 'Last Submitted',
-    value: '9/20/25',
-    linkText: 'Submit Timesheets',
+    description: 'Need Attention',
+    // value: 'Last updated : 9/20/25',
+    linkText: 'Track/edit your Timesheets',
     linkTo: '#',
   },
   {
@@ -22,11 +23,11 @@ const cards = [
     linkTo: '#',
   },
   {
-    icon: faFile,
-    title: 'Projects',
-    description: 'New Deadline:',
-    value: '10/12/25',
-    linkText: 'Go to Projects',
+    icon: faGithub,
+    title: 'GitHub',
+    description: 'Changes Detected',
+    // value: '10/12/25',
+    linkText: 'Go to Repository',
     linkTo: '#',
   },
 ];

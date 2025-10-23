@@ -1,177 +1,155 @@
-// src/components/Dashboard.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import '../styles/Dashboard.css';
+import api from '../api/axios';
 import logo from '../assets/v.png';
-import api from '../api/axios'
-import ManageTimesheets from './adminOnly/ManageTimesheets'
+import ManageTimesheets from './adminOnly/ManageTimesheets';
 import GlowingCards from './DashboardElements';
-
-
 import PersonalInfo from './PersonalInfo';
 import Projects from './Projects';
 import Timesheets from './Timesheets';
+import '../styles/Dashboard.css';
 
 const Dashboard = () => {
   const [user, setUser] = useState(null);
+  const [userId, setUserId] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [activeComponent, setActiveComponent] = useState('welcome');
-  const [headerHeight, setHeaderHeight] = useState(0);
-  const [isClockedIn, setIsClockedIn] = useState(() => {
-    return sessionStorage.getItem('isClockedIn') === 'true';
-  });
-const role = sessionStorage.getItem('role'); // e.g., 'USER' or 'ADMIN'
+  const [activeComponent, setActiveComponent] = useState('home');
+  const [isClockedIn, setIsClockedIn] = useState(false);
 
+  const navigate = useNavigate();
   const headerRef = useRef(null);
   const sidebarRef = useRef(null);
   const profileRef = useRef(null);
   const menuButtonRef = useRef(null);
 
-  const navigate = useNavigate();
-  const userId = Number(sessionStorage.getItem('userId'));
-
-
+  // ✅ Fetch user info + role + clock status securely from backend
   useEffect(() => {
-  const adminOnly = ['ManageTimesheets', 'adminReports'];
-  if (adminOnly.includes(activeComponent) && role !== 'ADMIN') {
-    setActiveComponent('home');
-  }
-}, [activeComponent, role]);
-  // Redirect if no userId
-  useEffect(() => {
-    if (!userId) {
-      navigate('/');
-      return;
-    }
+    const fetchUserData = async () => {
+      try {
+        // 'api' already attaches JWT Authorization header from axios interceptor
+        const res = await api.get('/users/who');
+        const data = res.data;
+        setUserId(data.userId);
 
-    // Calculate header height for sidebar positioning
-    const updateHeaderHeight = () => {
-      requestAnimationFrame(() => {
-        if (headerRef.current) {
-          setHeaderHeight(headerRef.current.offsetHeight);
-        }
-      });
+        setUser({
+          id: data.userId,
+          username: data.username,
+          fName: data.fName
+        });
+        setRole(data.role);
+        setIsClockedIn(data.ClockStatus === 'CLOCK_IN');
+
+      } catch (err) {
+        console.error('Error fetching user:', err);
+        navigate('/'); // token invalid or expired -> redirect
+      } finally {
+        setLoading(false);
+      }
     };
-    // MORE SECURITY FOR COMPONENT SPOOFING USING DEV TOOLS
-    
+
+    fetchUserData();
+  }, [navigate]);
+  // Close menu if clicked outside menu bar
+  useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (
+      sidebarRef.current &&
+      !sidebarRef.current.contains(event.target) &&
+      menuButtonRef.current &&
+      !menuButtonRef.current.contains(event.target)
+    ) {
+      setMenuOpen(false);
+    }
+
+    if (
+      profileRef.current &&
+      !profileRef.current.contains(event.target)
+    ) {
+      setProfileOpen(false);
+    }
+  };
+
+  document.addEventListener('mousedown', handleClickOutside);
+
+  return () => {
+    document.removeEventListener('mousedown', handleClickOutside);
+  };
+}, []);
 
 
-    updateHeaderHeight();
-    window.addEventListener('resize', updateHeaderHeight);
+  // ✅ Clock-in/out directly through backend (no local storage)
+  const handleClock = async () => {
+  if (!user) return;
 
-    // Fetch user data
-    const fetchUserDetails = async () => {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false,
+  });
+
+  const payload = {
+    userId: user.id,
+    date: now.toISOString().slice(0, 10),
+    start: isClockedIn ? null : timeStr,
+    end: isClockedIn ? timeStr : null,
+    status: isClockedIn ? 'CLOCK_OUT' : 'CLOCK_IN',
+  };
+
   try {
-    const response = await fetch(`http://localhost:8081/users/fetch/${userId}`);
-
-    if (!response.ok) {
-      console.error('Failed to fetch user details:', response.status);
-      setLoading(false);
-      return;
+    const res = await api.post('/tsManage/clock', payload);
+    if (res.status === 200) {
+      const newStatus = res.data.status || (isClockedIn ? 'CLOCK_OUT' : 'CLOCK_IN');
+      setIsClockedIn(newStatus === 'CLOCK_IN');
+    } else {
+      alert('Failed to update clock status');
     }
-
-    // Now safe to parse JSON
-    const data = await response.json();
-    setUser(data);
-    setActiveComponent('home');
-
-    // Fetch clock status
-    const statusRes = await fetch(`http://localhost:8081/tsManage/status/${userId}`);
-    if (statusRes.ok) {
-      const currentStatus = await statusRes.text(); // plain string
-      const clockedIn = currentStatus === 'CLOCK_IN';
-      setIsClockedIn(clockedIn);
-      sessionStorage.setItem('isClockedIn', clockedIn);
-    }
-
-  } catch (error) {
-    console.error('Error fetching user data:', error);
-  } finally {
-    setLoading(false);
+  } catch (err) {
+    console.error('Clock update failed:', err);
+    alert('Clock update failed.');
   }
 };
 
 
-    fetchUserDetails();
+  // ✅ Secure logout (backend clears refresh token cookie)
+  // const handleLogout = async () => {
+  //   try {
+  //     // await api.post('/users/logout');
+  //     sessionStorage.clear();
 
-    return () => {
-      window.removeEventListener('resize', updateHeaderHeight);
-    };
-  }, [userId, navigate]);
+  //   } catch (e) {
+  //     console.error('Logout error:', e);
+  //   } finally {
+  //     navigate('/');
+  //   }
+  // };
 
-  // Close menu/profile when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      const clickedSidebar = sidebarRef.current?.contains(event.target);
-      const clickedProfile = profileRef.current?.contains(event.target);
-      const clickedMenuBtn = menuButtonRef.current?.contains(event.target);
 
-      if (menuOpen && !clickedSidebar && !clickedMenuBtn) {
-        setMenuOpen(false);
-      }
-      if (profileOpen && !clickedProfile) {
-        setProfileOpen(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [menuOpen, profileOpen]);
-
-  // Logout handler
-  const handleLogout = () => {
+const handleLogout = () => {
+  try {
+    // Clear everything from sessionStorage
     sessionStorage.clear();
+
+    // Optionally also clear localStorage if you ever stored data there
+    localStorage.clear();
+  } catch (err) {
+    console.error('Error clearing storage:', err);
+  } finally {
+    // Navigate to login/home page
     navigate('/');
-  };
 
-  
-  // Check if last week's timesheet submitted
-  const hasSubmittedLastWeek = () => {
-    const submittedWeeks = JSON.parse(sessionStorage.getItem('submittedWeeks') || '[]');
-    const lastWeek = new Date();
-    lastWeek.setDate(lastWeek.getDate() - 7);
-    const weekString = lastWeek.toISOString().slice(0, 10);
-    return submittedWeeks.includes(weekString);
-  };
+    // Force reload so all React state & interceptors reset
+    window.location.reload();
+  }
+};
 
-  // Clock in/out handler
-  const handleClock = () => {
-    const payload = {
-      userId,
-      date: new Date().toISOString().slice(0, 10),  // e.g. "2025-09-11"
-      start: isClockedIn ? null : new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', second: '2-digit',hour12: false })
-// e.g. "11:24"
-,
-      end: isClockedIn ? new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit',second: '2-digit', hour12: false })
-// e.g. "11:24"
- : null,
-      status: isClockedIn ? 'CLOCK_OUT' : 'CLOCK_IN'
-      
-    };
-
-  
-api.post('http://localhost:8081/tsManage/clock', payload)
-  .then(res => {
-    if (res.status === 200) {
-      const newState = !isClockedIn;
-      setIsClockedIn(newState);
-      sessionStorage.setItem('isClockedIn', newState);
-    } else {
-      alert('Failed to update clock status.');
-    }
-  })
-  .catch(err => {
-    console.error('Clock update failed:', err);
-    alert('Failed to update clock status.');
-  });
-  };
-
-  if (loading) return <div className="dashboard-loading">Loading dashboard...</div>;
-  if (!user) return <div className="dashboard-error">User not found.</div>;
+  // UI Rendering
+  if (loading) return <div>Loading dashboard...</div>;
+  if (!user) return <div>Unauthorized or user not found.</div>;
 
   return (
     <div className="dashboard-container">
@@ -188,117 +166,66 @@ api.post('http://localhost:8081/tsManage/clock', payload)
           <img className="logoheader" src={logo} alt="Vectrolla Logo" />
           <h1 className="comp-name">vectrolla</h1>
         </div>
+
         <div
           ref={profileRef}
           className="profile-icon"
-          onClick={() => setProfileOpen(!profileOpen)}
+          onClick={() => setProfileOpen(!profileOpen)
+            
+          }
         >
-          👤Profile
+          👤 Profile
           {profileOpen && (
             <div className="profile-dropdown">
-              <button
-                onClick={() => {
-                  setActiveComponent('personalInfo');
-                  setProfileOpen(false);
-                }}
-              >
+              <button onClick={() => setActiveComponent('personalInfo')}>
                 Personal Info
               </button>
               <button onClick={handleLogout}>Logout</button>
-              <button onClick={() => alert('Redirect to bug report page')}>
-                Report a Bug
-              </button>
             </div>
           )}
         </div>
       </div>
 
-      
-
-      {/* Sidebar Menu */}
+      {/* Sidebar */}
       <div
         ref={sidebarRef}
         className={`sidebar ${menuOpen ? 'open' : ''}`}
         style={{
-          top: headerHeight || 80,
-          height: `calc(100% - ${headerHeight || 80}px)`
+          top: headerRef.current?.offsetHeight || 80,
+          height: `calc(100% - ${(headerRef.current?.offsetHeight || 80)}px)`
         }}
       >
-        <button
-          onClick={() => {
-            setActiveComponent('home');
-            setMenuOpen(false);
-          }}
-        >
-          🏠 Home
-        </button>
-        <button
-          onClick={() => {
-            setActiveComponent('timesheets');
-            setMenuOpen(false);
-          }}
-        >
-          📅 Timesheets
-        </button>
-        <button
-          onClick={() => {
-            setActiveComponent('projects');
-            setMenuOpen(false);
-          }}
-        >
-          📁 Projects
-        </button>
+        <button onClick={() => {setActiveComponent('home'); setMenuOpen(false);}}>🏠 Home</button>
+        <button onClick={() => {setActiveComponent('timesheets');setMenuOpen(false);}}>📅 Timesheets</button>
+        <button onClick={() => {setActiveComponent('projects');setMenuOpen(false);}}>📁 Projects</button>
         {role === 'ADMIN' && (
-    <>
-      <button onClick={() => { setActiveComponent('ManageTimesheets'); setMenuOpen(false); }}>🗓️ Manage Timesheets</button>
-      <button onClick={() => { setActiveComponent('adminReports'); setMenuOpen(false); }}>📊 Admin Reports</button>
-    </>
-  )}
-  
-
+          <>
+            <button onClick={() => {setActiveComponent('ManageTimesheets');setMenuOpen(false);}}>🗓️ Manage Timesheets</button>
+            <button onClick={() => {setActiveComponent('adminReports');setMenuOpen(false);}}>📊 Admin Reports</button>
+          </>
+        )}
       </div>
+
+      {/* Main Content */}
       {activeComponent === 'personalInfo' && <PersonalInfo user={user} />}
       {activeComponent === 'projects' && <Projects />}
-      {activeComponent === 'timesheets' && <Timesheets />}
-            {activeComponent === 'home' && 
-            <button
-  className={`oval-clock-btn ${isClockedIn ? 'clocked-in' : 'clocked-out'}`}
-  onClick={handleClock}
-  aria-label={isClockedIn ? 'Clock Out' : 'Clock In'}
->
-  {isClockedIn ? 'Clock Out' : 'Clock In'}
-</button>
-}
-{activeComponent === 'ManageTimesheets' && role === 'ADMIN' && <ManageTimesheets />}
-{activeComponent === 'home' && (
-  <div
-    className="home-dashboard"
-    style={{
-      display: 'flex',
-      flexDirection: 'column',    // to stack the button and cards vertically
-      justifyContent: 'center',   // vertical centering
-      alignItems: 'center',       // horizontal centering
-      height: '80vh',
-      gap: '20px'                 // space between button and cards
-    }}
-  >
-    <button
-      className={`oval-clock-btn ${isClockedIn ? 'clocked-in' : 'clocked-out'}`}
-      onClick={handleClock}
-    >
-      {isClockedIn ? 'Clock Out' : 'Clock In'}
-    </button>
+      {activeComponent === 'timesheets' && <Timesheets userId={userId} />}
+      {activeComponent === 'ManageTimesheets' && role === 'ADMIN' && <ManageTimesheets />}
 
-    <GlowingCards />
-  </div>
-)}
-
-
-
-
-
+      {activeComponent === 'home' && (
+        <div className="home-dashboard">
+          <button
+            className={`oval-clock-btn ${isClockedIn ? 'clocked-in' : 'clocked-out'}`}
+            onClick={handleClock}
+          >
+            {isClockedIn ? 'Clock Out' : 'Clock In'}
+          </button>
+         <div className="cards-container">
+      <GlowingCards />
     </div>
-    
+  </div>
+      )}
+    </div>
   );
 };
 

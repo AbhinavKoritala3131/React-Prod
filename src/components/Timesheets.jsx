@@ -8,7 +8,7 @@ import styles from '../styles/Timesheets.module.css';
 import api from '../api/axios'; 
 
 
-const Timesheets = () => {
+const Timesheets = ({ userId }) => {
   const [selectedWeek, setSelectedWeek] = useState('');
   const [weekOptions, setWeekOptions] = useState([]);
   const [weekDays, setWeekDays] = useState([]);
@@ -82,7 +82,6 @@ setSelectedWeek(defaultWeek.label);
 setWeekDays(generateWeekDays(defaultWeek.start));
 
   }, []);
-  const userId = Number(sessionStorage.getItem('userId'));
   const fetchWeekStatuses = async (weeks, userId) => {
   console.log('fetchWeekStatuses called with:', weeks, userId);
   try {
