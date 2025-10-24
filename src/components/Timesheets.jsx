@@ -357,7 +357,7 @@ const handleSendForApproval = async () => {
   const totalWeekMinutes = Math.round(totalWeekHours * 60);
 
   try {
-    await api.post('tsManage/submit', {
+    await api.post('/tsManage/submit', {
       userId,
       week: selectedWeek,
       weekTotal: totalWeekMinutes, // <-- converted to minutes
