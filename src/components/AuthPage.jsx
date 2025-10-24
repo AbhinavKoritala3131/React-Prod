@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 // import { useNavigate } from 'react-router-dom'; 
 import styles from'../styles/AuthPage.module.css';
 import logo from '../assets/v.png';
+import bgImage from '../assets/vlogbg.png';
 import { useNavigate, Link } from 'react-router-dom';  
 import api from '../api/axios';
 
@@ -334,7 +335,7 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
  
   </header>
   <div className={styles.mainContent}>
-   <div className={styles.leftPanel}>
+   <div className={styles.leftPanel}style={{ '--bg-image': `url(${bgImage})` }}>
     <h1 className={styles.sectionTitle}>What We Do</h1>
     <p className={styles.sectionDescription}>
       Vectrolla empowers teams with secure, real-time collaboration tools that streamline workflows, automate routine tasks, and scale productivity.

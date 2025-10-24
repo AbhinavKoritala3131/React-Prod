@@ -425,7 +425,7 @@ textarea:focus {
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url('../src/assets/vlogbg.png');
+  background-image: var(--bg-image);
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
