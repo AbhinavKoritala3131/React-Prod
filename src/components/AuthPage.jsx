@@ -168,8 +168,8 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
     };
 
     try {
-      const response = await api.post('http://localhost:8081/users/register', payload)
-     
+      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+const response = await api.post(`${API_BASE}/users/register`, payload);     
 
       const data = response.data;
 
@@ -233,7 +233,8 @@ const validateEmail = (username) => {
   }
 
     try {
-      const response = await api.post('http://localhost:8081/users/login',signinData);
+      const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:8081';
+const response = await api.post(`${API_BASE}/users/login`, signinData);
         if (response.status === 200) {
       const data = response.data;
 
