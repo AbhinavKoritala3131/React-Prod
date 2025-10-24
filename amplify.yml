@@ -1,0 +1,22 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        # Install correct Node version
+        - nvm install 18
+        - nvm use 18
+        # Clean install dependencies using package-lock.json
+        - npm ci --legacy-peer-deps
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    # Directory where your built React app will be located
+    baseDirectory: dist
+    files:
+      - '**/*'
+  cache:
+    # Cache node_modules for faster subsequent builds
+    paths:
+      - node_modules/**/*
