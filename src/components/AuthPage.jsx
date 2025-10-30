@@ -244,7 +244,7 @@ const response = await api.post(`/users/login`, signinData);
         sessionStorage.setItem('jwtToken', data.jwtToken);
         setSigninSubmitted(false);
         setTimeout(() => {
-          console.log('Login response:', data);
+          // console.log('Login response:', data);
           
 
           navigate('/Dashboard');
