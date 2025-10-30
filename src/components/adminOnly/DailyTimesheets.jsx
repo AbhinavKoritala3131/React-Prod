@@ -103,7 +103,7 @@ const minutesToHourMinuteString = (minutes) => {
     }).filter(Boolean); // remove nulls
 
     if (updates.length === 0) return;
-          console.log("Sending updates to backend:", updates); // <-- Add this line to log
+          // console.log("Sending updates to backend:", updates); // <-- Add this line to log
 
 
     try {
