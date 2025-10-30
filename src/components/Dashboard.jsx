@@ -35,9 +35,14 @@ const Dashboard = () => {
         setUserId(data.userId);
 
         setUser({
-          id: data.userId,
-          username: data.username,
-          fName: data.fName
+         id: data.userId,
+          email: data.username,
+          fName: data.fName,
+          lName: data.lName,          
+          
+  mobile: data.mobile,
+  country: data.country,      
+  DOB: data.DOB 
         });
         setRole(data.role);
         setIsClockedIn(data.ClockStatus === 'CLOCK_IN');
@@ -208,7 +213,7 @@ const handleLogout = () => {
 
       {/* Main Content */}
       {activeComponent === 'personalInfo' && <PersonalInfo user={user} />}
-      {activeComponent === 'projects' && <Projects />}
+      {activeComponent === 'projects' && <Projects userId={userId}/>}
       {activeComponent === 'timesheets' && <Timesheets userId={userId} />}
       {activeComponent === 'ManageTimesheets' && role === 'ADMIN' && <ManageTimesheets />}
 

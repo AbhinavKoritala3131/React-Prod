@@ -40,8 +40,8 @@ const WeeklyStatusTab = ({ selectedWeek }) => {
   const statusEntry = statusEntries.find(e => e.id === statusId);
   if (!statusEntry) return;
 
-  const remarkText = remarks[statusId] || (newStatus === 'APPROVED' ? 'Approved' : '');
-  if (newStatus === 'REJECTED' && !remarkText) {
+  const remarkText = remarks[statusId] || '';
+  if (newStatus === 'REJECTED' && !remarkText.trim()) {
     alert('❗ Please provide a reason for rejection.');
     return;
   }
@@ -50,13 +50,14 @@ const WeeklyStatusTab = ({ selectedWeek }) => {
     await api.put('/admins/update-status', {
       empId: statusEntry.empId,   // ✅ using the found entry
       week: statusEntry.week,
-      rem: newStatus
+      status: newStatus,    
+      rem: remarkText 
     });
 
     setStatusEntries(prev =>
       prev.map(e =>
         e.id === statusId
-          ? { ...e, remarks: newStatus } // ✅ your backend maps 'remarks' to status
+          ? { ...e, status: newStatus, remarks:remarkText } // ✅ your backend maps 'remarks' to status
           : e
       )
     );

@@ -1,0 +1,83 @@
+.projectsContainer {
+  padding: 2rem;
+  background: linear-gradient(135deg, #1f1c2c, #928dab);
+  min-height: 100vh;
+  color: #f0f0f0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.projectsGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: flex-start;
+}
+
+
+.projectCard {
+  flex: 0 0 300px;  /* fixed width; won't stretch */
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 15px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+
+.projectCard:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.status {
+  display: inline-block;
+  padding: 0.25rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  text-transform: uppercase;
+}
+
+/* Status colors */
+.completed {
+  background-color: #4caf50; /* Green */
+  color: #fff;
+}
+
+.ongoing {
+  background-color: #ffeb3b; /* Yellow */
+  color: #000;
+}
+
+.due {
+  background-color: #f44336; /* Red */
+  color: #fff;
+}
+
+.upcoming {
+  background-color: #ffffff; /* White */
+  color: #000;
+  border: 1px solid #ccc;
+}
+
+
+.deadline {
+  font-size: 0.85rem;
+  font-style: italic;
+  margin-top: 0.5rem;
+  color: #ffe082;
+}
+.projectsGrid:has(.projectCard:only-child) {
+  justify-content: center; /* CSS :has support in modern browsers */
+}
+.noProjects {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #ffcccb;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1.5rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  font-style: italic;
+}

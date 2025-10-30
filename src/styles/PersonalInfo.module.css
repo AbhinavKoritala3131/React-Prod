@@ -1,0 +1,71 @@
+/* src/styles/PersonalInfo.module.css */
+
+.personalInfoCard {
+  background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);
+  border-radius: 20px;
+  padding: 40px 32px;
+  max-width: 600px; /* increased width */
+  width: 90%;
+  margin: 30px auto;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2); /* slightly stronger shadow */
+  color: #222;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.personalInfoCard:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 16px 35px rgba(0, 0, 0, 0.3);
+}
+
+.personalInfoCard h2 {
+  font-size: 2.2rem; /* larger heading */
+  margin-bottom: 24px;
+  color: #fff;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.25);
+  text-align: center;
+}
+
+.personalInfoCard ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.personalInfoCard li {
+  font-size: 1.2rem; /* bigger font for readability */
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.15);
+  padding: 12px 16px; /* more padding */
+  border-radius: 12px;
+  transition: background-color 0.3s ease;
+}
+
+.personalInfoCard li:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+.personalInfoCard li strong {
+  color: #fff;
+  margin-right: 10px;
+}
+
+
+
+@media (max-width: 500px) {
+  .personalInfoCard {
+    padding: 16px;
+    margin: 10px;
+  }
+
+  .personalInfoCard h2 {
+    font-size: 1.5rem;
+  }
+
+  .personalInfoCard li {
+    font-size: 0.95rem;
+  }
+}

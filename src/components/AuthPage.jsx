@@ -248,7 +248,7 @@ const response = await api.post(`/users/login`, signinData);
           
 
           navigate('/Dashboard');
-        }, 1500);
+        }, 1250);
       } else {
         setSigninResponse({ success: false, message: data || 'Something went wrong !' });
       }

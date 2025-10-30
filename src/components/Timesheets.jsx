@@ -83,13 +83,13 @@ setWeekDays(generateWeekDays(defaultWeek.start));
 
   }, []);
   const fetchWeekStatuses = async (weeks, userId) => {
-  console.log('fetchWeekStatuses called with:', weeks, userId);
+  // console.log('fetchWeekStatuses called with:', weeks, userId);
   try {
     const res = await api.post('/tsManage/status-check', {
       empId: userId,
       weeks,
     });
-    console.log('API response:', res.data);
+    // console.log('API response:', res.data);
 
     const { previous: prevStatus, current: currStatus } = res.data;
 
@@ -99,10 +99,10 @@ setWeekDays(generateWeekDays(defaultWeek.start));
     });
 
     const submitted = [];
-    if (prevStatus === 'SUBMITTED') submitted.push(weeks[0]);
-    if (currStatus === 'SUBMITTED') submitted.push(weeks[1]);
+     if (prevStatus !== "NOT_SUBMITTED") submitted.push(weeks[0]);
+    if (currStatus !== "NOT_SUBMITTED") submitted.push(weeks[1]);
 
-    console.log('Setting submitted weeks:', submitted);
+    // console.log('Setting submitted weeks:', submitted);
     setSubmittedWeeks(submitted);
   } catch (err) {
     console.error('Error fetching week statuses:', err);
@@ -121,9 +121,9 @@ setWeekDays(generateWeekDays(defaultWeek.start));
 
 }, [selectedWeek,  userId]); // ✅ Add selectedWeek and weekOptions.length
 useEffect(() => {
-  console.log('submittedWeeks:', submittedWeeks);
-  console.log('weekOptions:', weekOptions);
-  console.log('selectedWeek:', selectedWeek);
+  // console.log('submittedWeeks:', submittedWeeks);
+  // console.log('weekOptions:', weekOptions);
+  // console.log('selectedWeek:', selectedWeek);
 }, [submittedWeeks, weekOptions, selectedWeek]);
 
   useEffect(() => {
