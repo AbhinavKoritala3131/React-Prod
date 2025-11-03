@@ -1,0 +1,145 @@
+/* ========== CONTAINER ========== */
+.proj-container {
+  max-width: 600px;
+  margin: 60px auto;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* ========== TABS ========== */
+.proj-tabs {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 25px;
+}
+
+.proj-tabs button {
+  background-color: #f0f4f8;
+  border: 2px solid #ccc;
+  padding: 10px 22px;
+  border-radius: 50px;
+  font-weight: 600;
+  font-size: 15px;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.proj-tabs button:hover {
+  background-color: #e0e7ff;
+  border-color: #b3c7f9;
+}
+
+.active-tab {
+  background-color: #4f83cc;
+  color: #fff;
+  border-color: #4f83cc;
+}
+
+/* ========== FORM SECTIONS ========== */
+.proj-section {
+  margin-bottom: 20px;
+}
+
+.proj-section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  border-bottom: 2px solid #eaeaea;
+  padding-bottom: 8px;
+  margin-bottom: 20px;
+}
+
+.proj-label {
+  font-size: 14px;
+  color: #555;
+  font-weight: 500;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ========== INPUTS, SELECTS ========== */
+.proj-input,
+.proj-select {
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f7f9fc;
+  color: #333;
+  transition: all 0.3s ease;
+  margin-bottom: 10px;
+}
+
+.proj-input:focus,
+.proj-select:focus {
+  border-color: #4c9df5;
+  box-shadow: 0 0 5px rgba(76, 157, 245, 0.4);
+  outline: none;
+}
+
+/* ========== BUTTONS ========== */
+.proj-submit-btn {
+  background-color: #4c9df5;
+  color: #fff;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  text-transform: uppercase;
+  margin-top: 10px;
+}
+
+.proj-submit-btn:hover {
+  background-color: #0077cc;
+  transform: scale(1.04);
+}
+
+.proj-delete-btn {
+  background-color: #f44336 !important;
+}
+
+.proj-delete-btn:hover {
+  background-color: #e53935 !important;
+}
+
+/* ========== MESSAGES ========== */
+.error {
+  color: #d32f2f;
+  background-color: #fdecea;
+  border: 1px solid #f5c6cb;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+.success {
+  color: #2e7d32;
+  background-color: #e8f5e9;
+  border: 1px solid #c8e6c9;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 10px;
+}
+
+/* ========== ANIMATIONS ========== */
+.error,
+.success {
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}

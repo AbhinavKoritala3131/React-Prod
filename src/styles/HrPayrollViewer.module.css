@@ -1,0 +1,120 @@
+.container {
+  min-height: calc(100vh - 80px);
+  max-height: calc(100vh - 80px);
+  overflow-y: hidden;
+  background-color: #1f1f2e;
+  padding: 30px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  color: white;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.contentWrapper {
+  flex: 1; /* take remaining vertical space */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* top-align content instead of center */
+  align-items: center;
+  gap: 10px; /* optional spacing between table/loading/noData */
+}
+
+
+.noData, .loading {
+  text-align: center;
+  font-size: 1.1rem;
+  color: #a0a0b0;
+  padding: 10px;
+}
+
+
+
+.h2 {
+  text-align: center;
+  color: #4fc3f7;
+  margin-bottom: 25px;
+  text-shadow: 0 1px 3px #000;
+}
+
+.weekSelector {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.weekSelector button {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background-color: #4fc3f7;
+  color: #1f1f2e;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.weekSelector button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.weekSelector button:hover:not(:disabled) {
+  background-color: #3aa0d8;
+}
+
+.weekSelector span {
+  font-weight: bold;
+  color: #f0f0f0;
+}
+
+.tableWrapper {
+  overflow-x: auto;  /* horizontal scroll */
+  overflow-y: auto;  /* vertical scroll if needed */
+  max-height: calc(100vh - 200px); /* adjust so table doesn't exceed viewport */
+    padding-right: 10px; 
+
+}
+
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #2a2a3d;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table th, .table td {
+  padding: 12px;
+  text-align: center;
+}
+
+.table th {
+  background-color: #3f3f5a;
+  color: #4fc3f7;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.table tr:nth-child(even) {
+  background-color: #2f2f44;
+}
+
+.table tr:hover {
+  background-color: #3b3b5c;
+  transition: 0.2s;
+}
+
+.fixedWidthColumn {
+  width: 400px;          /* increase width here */
+  max-width: 400px;      /* keep it fixed */
+  white-space: normal;   /* allow wrapping */
+  word-wrap: break-word; /* break long lines */
+  overflow-wrap: break-word;
+  text-align: left;      /* make text align nicely */
+}

@@ -96,10 +96,12 @@ const [signinSubmitted, setSigninSubmitted] = useState(false);
   const validateRegisterForm = () => {
     const errors = {};
 
-    if (!formData.firstName.trim() || formData.firstName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.firstName.trim())) {
+    if (!formData.firstName.trim() || formData.firstName.trim().length < 2 ||  !/^[A-Za-z\s]+$/.test(formData.firstName.trim())) {
+
       errors.firstName = 'First name must be at least 2 letters and contain only letters';
     }
-    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 ||  !/^[A-Za-z]+$/.test(formData.lastName.trim())) {
+    if (!formData.lastName.trim() || formData.lastName.trim().length < 2 ||  !/^[A-Za-z\s]+$/.test(formData.lastName.trim())) {
+
       errors.lastName = 'Last name must be at least 2 letters and contain only letters';
     }
     if (!formData.username.trim()) {
@@ -322,14 +324,14 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
     }
   </div>
   
-  <nav className={styles.headerNav}>
+  {/* <nav className={styles.headerNav}>
     <ul>
       <li><Link to="/home">Home</Link></li>
       <li><Link to="/about-us">About Us</Link></li>
       <li><Link to="/contact">Contact</Link></li>
       <li><Link to="/partners">Partners</Link></li>
     </ul>
-  </nav>
+  </nav> */}
 
  
   </header>
@@ -576,7 +578,8 @@ const hasRegisterErrors = registerSubmitted && Object.keys(formErrors).length > 
         )}
 
       </div></div>
-              <footer className="footer">© 2025 Vectrolla. All rights reserved.</footer>
+<footer className={styles.footer}>© 2025 Vectrolla. All rights reserved.</footer>
+
 
     </div>
     

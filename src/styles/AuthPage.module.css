@@ -332,13 +332,11 @@ textarea:focus {
 
 /* Footer */
 .footer {
-  text-align: center;
-  font-size: 0.85rem;
-  color: #aaa;
-  background: #111;
-  padding: 1rem 0;
-  width: 100%;
-  border-top: 1px solid #2a2a2a;
+  margin-top: auto; /* Pushes the footer to the bottom */
+  text-align: center; /* Centers the text horizontally */
+  padding: 20px; /* Adjust the padding as needed */
+  background-color: #333; /* Optional, add a background color */
+  color: white; /* Optional, set the text color */
 }
 
 /* Status Messages */
@@ -445,4 +443,18 @@ textarea:focus {
   line-height: 1.6;
   max-width: 500px;
   color: #c0c0c0;
+}
+.navItem {
+  display: inline-block;
+  margin: 0 15px;
+} 
+
+.navItem a {
+  text-decoration: none;
+  color: #000; /* Adjust the color as needed */
+  font-weight: bold; /* Optional */
+}
+
+.navItem a:hover {
+  color: #007bff; /* Optional hover effect */
 }

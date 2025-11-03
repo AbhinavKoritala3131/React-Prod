@@ -1,5 +1,5 @@
 .projectsContainer {
-  padding: 2rem;
+  padding: 4rem 2rem 2rem 2rem; /* extra top padding */
   background: linear-gradient(135deg, #1f1c2c, #928dab);
   min-height: 100vh;
   color: #f0f0f0;
